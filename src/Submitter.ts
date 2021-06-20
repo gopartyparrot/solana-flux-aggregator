@@ -140,12 +140,16 @@ export class Submitter {
 
       this.currentValue = new BN(price.value)
 
+      // this.logger.info("Current price", {
+      //   source: price.source,
+      //   price: price.value
+      // })
+
       metricOracleFeedPrice.set({
         submitter: this.oracle.description,
         feed: price.pair,
         source: price.source,
       }, price.value / 10 ** price.decimals)
-
 
       const lastSubmit = Date.now() - (this.lastSubmit.get(this.aggregatorPK.toBase58()) || Date.now());
       metricOracleSinceLastSubmitSeconds.set({
