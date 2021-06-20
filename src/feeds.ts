@@ -534,6 +534,7 @@ export class AggregatedFeed {
           this.logger.error(`No price data from websocket`, meta)
           this.errorNotifier?.notifyCritical('AggregatedFeed', `No price data from websocket`, meta)
           // force restart process
+          // TODO: close websocket
           // process.exit(1);
         }
       }

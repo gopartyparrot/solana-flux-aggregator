@@ -138,6 +138,8 @@ export class Submitter {
         )
       }
 
+      // TODO: save price as currentValue, in submitCurrentValue check price.time
+      // Do not submit price older then 5 minutes
       this.currentValue = new BN(price.value)
 
       // this.logger.info("Current price", {
@@ -266,6 +268,8 @@ export class Submitter {
   }
 
   private async submitCurrentValue(roundID: BN) {
+
+    // TODO: check price time
 
     // guard zero value
     if (this.currentValue.isZero()) {
