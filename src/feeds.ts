@@ -426,6 +426,7 @@ export class FilePriceFeed extends PriceFeed {
         try {
           fs.accessSync(filename, fs.constants.R_OK)
           let price = JSON.parse(fs.readFileSync(filename, 'utf8')); //TODO validate
+          price.time = Date.now();
           this.onMessage(price);
         } catch (e) {
           //no permission to read or file not exists, or file content err
@@ -565,7 +566,7 @@ export class AggregatedFeed {
 
     const now = Date.now()
     const acceptedTime = now - (2* 60 * 1000) // 5 minutes ago
-
+    
     const values = prices
       // accept only prices > 0 that have been updated within 5 minutes
       .filter(price => price.value > 0 && price.time >= acceptedTime)
