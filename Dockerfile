@@ -5,13 +5,15 @@ WORKDIR /app
 COPY package.json yarn.lock tsconfig.json ./
 COPY ./src ./src
 COPY ./config ./config
-COPY deploy.private.json solink.private.json ./
+COPY deploy.**.json ./
 
 RUN apk add --no-cache git
 RUN yarn install
 RUN yarn global add typescript
 
 RUN tsc --outDir dist
+
+EXPOSE 7777
 
 #run:
 #docker run -e NETWORK=dev --rm flux:$tag node dist/cli.js read-median HBVsLHp8mWGMGfrh1Gf5E8RAxww71mXBgoZa6Zvsk5cK

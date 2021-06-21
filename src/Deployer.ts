@@ -3,7 +3,6 @@ import fs from "fs"
 import path from "path"
 
 import {
-  Account,
   BPFLoader,
   ProgramAccount,
   PublicKey,
@@ -21,7 +20,6 @@ import FluxAggregator from "./FluxAggregator"
 import { AggregatorConfig, IAggregatorConfig } from "./schema"
 import { jsonReplacer, jsonReviver } from "./json"
 import { log } from "./log"
-import { config } from "dotenv/types"
 
 interface OracleDeployInfo {
   pubkey: PublicKey
@@ -84,6 +82,10 @@ export class Deployer {
       }
     )
     this.setup = loadAggregatorSetup(setupFile)
+  }
+
+  get program() {
+    return new FluxAggregator(this.wallet, this.state.programID)
   }
 
   async runAll() {
@@ -150,10 +152,6 @@ export class Deployer {
         log.info(`Requester added`, { name, requesterName })
       }
     }
-  }
-
-  get program() {
-    return new FluxAggregator(this.wallet, this.state.programID)
   }
 
   async createRewardFaucet(

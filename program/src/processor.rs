@@ -1,10 +1,6 @@
 //! Program state processor
 
-use crate::{
-    error::Error,
-    instruction::{self, Instruction},
-    state::{Aggregator, AggregatorConfig, Authority, Oracle, Requester, Round, Submissions},
-};
+use crate::{error::Error, instruction::{Instruction}, state::{Aggregator, AggregatorConfig, Authority, Oracle, PublicKey, Requester, Round, Submission, Submissions}};
 
 // use spl_token::state;
 use solana_program::{
@@ -14,7 +10,7 @@ use solana_program::{
     msg,
     program::invoke_signed,
     program_error::ProgramError,
-    program_pack::{IsInitialized, Pack},
+    program_pack::{IsInitialized},
     pubkey::Pubkey,
     sysvar::{rent::Rent, Sysvar},
 };
@@ -100,6 +96,30 @@ impl<'a> ConfigureContext<'a> {
     }
 }
 
+struct TransferOwnerContext<'a> {
+    aggregator: &'a AccountInfo<'a>,
+    aggregator_owner: &'a AccountInfo<'a>,
+    
+    aggregator_new_owner: PublicKey,
+}
+
+impl<'a> TransferOwnerContext<'a> {
+    fn process(&self) -> ProgramResult {
+        let mut aggregator = Aggregator::load_initialized(&self.aggregator)?;
+        aggregator.authorize(self.aggregator_owner)?;
+
+        // new owner need to be also a signer?
+        // if !self.aggregator_new_owner.is_signer {
+        //     return Err(ProgramError::MissingRequiredSignature);
+        // }
+
+        aggregator.owner = self.aggregator_new_owner.clone();
+        aggregator.save(self.aggregator)?;
+
+        Ok(())
+    }
+}
+
 struct AddOracleContext<'a> {
     rent: Rent,
     aggregator: &'a AccountInfo<'a>,
@@ -116,7 +136,7 @@ impl<'a> AddOracleContext<'a> {
         let aggregator = Aggregator::load_initialized(self.aggregator)?;
         msg!("loaded aggregator");
         aggregator.authorize(self.aggregator_owner)?;
-
+        
         let mut oracle = Oracle::init_uninitialized(self.oracle)?;
         msg!("loaded oracle");
         oracle.is_initialized = true;
@@ -267,6 +287,7 @@ struct SubmitContext<'a> {
 
 impl<'a> SubmitContext<'a> {
     fn process(&self) -> ProgramResult {
+        let now = self.clock.slot;
         let mut aggregator = Aggregator::load_initialized(self.aggregator)?;
         let mut oracle = Oracle::load_initialized(self.oracle)?;
         oracle.authorize(self.oracle_owner)?;
@@ -286,13 +307,14 @@ impl<'a> SubmitContext<'a> {
             return Err(Error::InvalidRoundID)?;
         }
 
-        self.submit(&mut aggregator)?;
+        self.submit(&mut aggregator, &mut oracle)?;
 
         // credit oracle for submission
         oracle.withdrawable = oracle
             .withdrawable
             .checked_add(aggregator.config.reward_amount)
             .ok_or(Error::RewardsOverflow)?;
+        oracle.updated_at = now;
 
         aggregator.save(self.aggregator)?;
         oracle.save(self.oracle)?;
@@ -302,7 +324,7 @@ impl<'a> SubmitContext<'a> {
 
     /// push oracle answer to the current round. update answer if min submissions
     /// had been satisfied.
-    fn submit(&self, aggregator: &mut Aggregator) -> ProgramResult {
+    fn submit(&self, aggregator: &mut Aggregator, oracle: &mut Oracle) -> ProgramResult {
         let now = self.clock.slot;
 
         let mut round_submissions = aggregator.round_submissions(self.round_submissions)?;
@@ -336,6 +358,7 @@ impl<'a> SubmitContext<'a> {
         submission.updated_at = now;
         submission.value = self.value;
         submission.oracle = self.oracle.key.to_bytes();
+        oracle.submission = submission.clone();
 
         // this line is for later, but put here to deal with borrow check...
         let new_submission = *submission;
@@ -524,6 +547,12 @@ fn process2(instruction: Instruction, accounts: Accounts) -> ProgramResult {
             aggregator: accounts.get(0)?,
             aggregator_owner: accounts.get(1)?,
             config,
+        }
+        .process(),
+        Instruction::TransferOwner { new_owner } => TransferOwnerContext {
+            aggregator: accounts.get(0)?,
+            aggregator_owner: accounts.get(1)?,
+            aggregator_new_owner: new_owner,
         }
         .process(),
         Instruction::AddOracle { description } => AddOracleContext {

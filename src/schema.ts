@@ -2,7 +2,6 @@ import { PublicKey, Account } from "solray"
 import BN from "bn.js"
 import { deserialize, serialize } from "borsh"
 import { conn } from "./context"
-import { jsonReplacer } from "./json"
 
 const MAX_ORACLES = 13
 
@@ -97,7 +96,7 @@ export abstract class Serialization {
   }
 }
 
-class Submission {
+class Submission extends Serialization {
   public updatedAt!: BN
   public value!: BN
   public oracle!: PublicKey
@@ -109,10 +108,6 @@ class Submission {
       ["value", "u64"],
       ["oracle", [32], pubkeyMapper],
     ],
-  }
-
-  constructor(data: any) {
-    Object.assign(this, data)
   }
 }
 
@@ -231,6 +226,7 @@ export class Aggregator extends Serialization {
   public answerSubmissions!: PublicKey
   public answer!: Answer
   public round!: Round
+  public owner!: PublicKey
 
   public static schema = {
     kind: "struct",
@@ -270,6 +266,13 @@ export class Configure extends InstructionSerialization {
   public static schema = {
     kind: "struct",
     fields: [["config", AggregatorConfig]],
+  }
+}
+
+export class TransferOwner extends InstructionSerialization {
+  public static schema = {
+    kind: "struct",
+    fields: [["newOwner", [32], pubkeyMapper]],
   }
 }
 
@@ -334,6 +337,7 @@ export class Instruction extends Serialization {
     values: [
       [Initialize.name, Initialize],
       [Configure.name, Configure],
+      [TransferOwner.name, TransferOwner],
       [AddOracle.name, AddOracle],
       [RemoveOracle.name, RemoveOracle],
       [AddRequester.name, AddRequester],
@@ -380,21 +384,27 @@ function boolToInt(t: boolean) {
 }
 
 export class Oracle extends Serialization {
-  public static size = 113
-  public allowStartRound!: BN
+  public static size = 169
+  public description!: string
+  public isInitialized!: boolean
   public withdrawable!: BN
+  public allowStartRound!: BN
+  public updatedAt!: BN
+  public submission!: Submission
 
   public static schema = {
-    kind: "struct",
+    kind: 'struct',
     fields: [
-      ["description", [32], str32Mapper],
-      ["isInitialized", "u8", boolMapper],
-      ["withdrawable", "u64"],
-      ["allowStartRound", "u64"],
-      ["aggregator", [32], pubkeyMapper],
-      ["owner", [32], pubkeyMapper],
-    ],
-  }
+      ['description', [32], str32Mapper],
+      ['isInitialized', 'u8', boolMapper],
+      ['withdrawable', 'u64'],
+      ['allowStartRound', 'u64'],
+      ['updatedAt', 'u64'],
+      ['aggregator', [32], pubkeyMapper],
+      ['owner', [32], pubkeyMapper],
+      ['submission', Submission],
+    ]
+  };
 
   public canStartNewRound(round: BN): boolean {
     return this.allowStartRound.lte(round)
@@ -438,12 +448,14 @@ export const schema = new Map([
   [Instruction, Instruction.schema],
   [Initialize, Initialize.schema],
   [Configure, Configure.schema],
+  [TransferOwner, TransferOwner.schema],
+
   [AddOracle, AddOracle.schema],
-
   [AddRequester, AddRequester.schema],
+  [RemoveOracle, RemoveOracle.schema],
   [RemoveRequester, RemoveRequester.schema],
-  [RequestRound, RequestRound.schema],
 
+  [RequestRound, RequestRound.schema],
   [Submit, Submit.schema],
 
 ] as any) as any

@@ -7,6 +7,7 @@ dist
 .pnp.js
 .env
 .env.prod
+.env.dev
 deploy.json
 integration-example/Cargo.lock
 .DS_Store
@@ -15,7 +16,8 @@ config/setup.local.json
 config/setup.private.json
 deploy.local.json
 deploy.private.json
-solink.private.json
+telegram.bot.json
 yarn-error.log
+logs/*.log
 chainlink/*
 !chainlink/config

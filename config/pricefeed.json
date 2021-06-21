@@ -1,0 +1,16 @@
+{
+  "_description": "configure witch feeds to use for pair, and other param",
+  "priceFileDir": "./config/prices",
+  "submitter": {
+   
+    "sol:usd": {
+      "source": ["ftx", "coinbase"],
+      "minValueChangeForNewRound": 1
+    },
+   
+    "default": {
+      "source": [],
+      "minValueChangeForNewRound": 100
+    }
+  }
+}

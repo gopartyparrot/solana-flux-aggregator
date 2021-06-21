@@ -1,16 +1,15 @@
 import { PublicKey, Wallet } from "solray"
 import { conn } from "./context"
-
 import { Aggregator, Submissions, Oracle } from "./schema"
 import BN from "bn.js"
-import { getAccounts, getMultipleAccounts, sleep } from "./utils"
+import { getAccounts, parseTransactionError, retryOperation } from "./utils"
 import FluxAggregator from "./FluxAggregator"
-
-import { createLogger, Logger } from "winston"
-
+import {  Logger } from "winston"
 import { log } from "./log"
 import { IPriceFeed } from "./feeds"
 import axios from "axios"
+import { ErrorNotifier } from "./ErrorNotifier"
+import { metricOracleFeedPrice, metricOracleLastSubmittedPrice, metricOracleSinceLastSubmitSeconds } from "./metrics"
 
 // allow oracle to start a new round after this many slots. each slot is about 500ms
 const MAX_ROUND_STALENESS = 10
@@ -40,36 +39,38 @@ export class Submitter {
   public program: FluxAggregator
   public logger!: Logger
   public currentValue: BN
+  public previousRound: BN
   public reportedRound: BN
+  public lastSubmit = new Map<string, number>()
 
   constructor(
     programID: PublicKey,
     public aggregatorPK: PublicKey,
     public oraclePK: PublicKey,
     private oracleOwnerWallet: Wallet,
-
+    private errorNotifier: ErrorNotifier,
     private priceFeed: IPriceFeed,
     private cfg: SubmitterConfig,
     private getSlot: () => number
   ) {
     this.program = new FluxAggregator(this.oracleOwnerWallet, programID)
-
     this.currentValue = new BN(0)
+    this.previousRound = new BN(0)
     this.reportedRound = new BN(0)
   }
 
-  // TODO: harvest rewards if > n
-
   public async start() {
-    await this.observeAggregatorState()
+    await this.reloadStates()
 
     this.logger = log.child({
       aggregator: this.aggregator.config.description,
     })
 
+    await this.observeAggregatorState()
     await this.observePriceFeed()
   }
 
+  // TODO: harvest rewards if > n
   public async withdrawRewards() {
     // if (this.oracle.withdrawable.isZero()) {
     //   return
@@ -83,24 +84,29 @@ export class Submitter {
     // })
   }
 
-  private async reloadStates() {
-    if (!this.aggregator) {
-      this.aggregator = await Aggregator.load(this.aggregatorPK)
-    }
+  private async reloadStates()  {
+    try {
+      if (!this.aggregator) {
+        this.aggregator = await Aggregator.load(this.aggregatorPK)
+      }
 
-    const [
-      oracle,
-      roundSubmissions,
-      answerSubmissions,
-    ] = await getAccounts(conn, [
-      this.oraclePK,
-      this.aggregator.roundSubmissions,
-      this.aggregator.answerSubmissions,
-    ])
+      const [
+        oracle,
+        roundSubmissions,
+        answerSubmissions,
+      ] = await getAccounts(conn, [
+        this.oraclePK,
+        this.aggregator.roundSubmissions,
+        this.aggregator.answerSubmissions,
+      ])
 
-    this.oracle = Oracle.deserialize(oracle.data)
-    this.answerSubmissions = Submissions.deserialize(answerSubmissions.data)
-    this.roundSubmissions = Submissions.deserialize(roundSubmissions.data)
+      this.oracle = Oracle.deserialize(oracle.data)
+      this.answerSubmissions = Submissions.deserialize(answerSubmissions.data)
+      this.roundSubmissions = Submissions.deserialize(roundSubmissions.data)   
+    } catch(err) {
+      this.logger.error('Error in ReloadStates', err)
+      throw err
+    } 
   }
 
   private isRoundReported(roundID: BN): boolean {
@@ -108,22 +114,20 @@ export class Submitter {
   }
 
   private async observeAggregatorState() {
-    await this.reloadStates()
-
     conn.onAccountChange(this.aggregatorPK, async (info) => {
       this.aggregator = Aggregator.deserialize(info.data)
 
       if (this.isRoundReported(this.aggregator.round.id)) {
         return
       }
-
+      
       // only update states if actually reporting to save RPC calls
       await this.reloadStates()
       this.onAggregatorStateUpdate()
     })
   }
 
-  private async observePriceFeed() {
+  private async observePriceFeed() {    
     for await (let price of this.priceFeed) {
       if (price.decimals != this.aggregator.config.decimals) {
         throw new Error(
@@ -131,11 +135,31 @@ export class Submitter {
         )
       }
 
+      // TODO: save price as currentValue, in submitCurrentValue check price.time
+      // Do not submit price older then 5 minutes
       this.currentValue = new BN(price.value)
+
+      // this.logger.info("Current price", {
+      //   source: price.source,
+      //   price: price.value
+      // })
+
+      metricOracleFeedPrice.set({
+        submitter: this.oracle.description,
+        feed: price.pair,
+        source: price.source,
+      }, price.value / 10 ** price.decimals)
+
+      const lastSubmit = Date.now() - (this.lastSubmit.get(this.aggregatorPK.toBase58()) || Date.now());
+      metricOracleSinceLastSubmitSeconds.set({
+        submitter: this.oracle.description,
+        feed: this.aggregator.config.description,
+      }, Math.floor(lastSubmit / 1000))
 
       const valueDiff = this.aggregator.answer.median
         .sub(this.currentValue)
         .abs()
+        
       if (valueDiff.lten(this.cfg.minValueChangeForNewRound)) {
         this.logger.debug("price did not change enough to start a new round", {
           diff: valueDiff.toNumber(),
@@ -143,21 +167,21 @@ export class Submitter {
         continue
       }
 
-      // should reload the state before trying to submit
-      await this.reloadStates()
+      if (!this.isRoundReported(this.aggregator.round.id)) {
+        // should reload the state if no round is reported
+        await this.reloadStates()
+      }
+      
       await this.trySubmit()
     }
   }
 
   private async trySubmit() {
-    // TODO: make it possible to be triggered by chainlink task
-    // TODO: If from chainlink node, update state before running
     this.logger.debug("oracle", { oracle: this.oracle })
 
     const { round } = this.aggregator
 
     if (this.canSubmitToCurrentRound) {
-      this.logger.info("Submit to current round")
       await this.submitCurrentValue(round.id)
       return
     }
@@ -199,9 +223,9 @@ export class Submitter {
 
   get canSubmitToCurrentRound(): boolean {
     return this.roundSubmissions.canSubmit(
-      this.oraclePK,
-      this.aggregator.config
-    )
+        this.oraclePK,
+        this.aggregator.config
+      )
   }
 
   private async createChainlinkSubmitRequest(roundID: BN) {
@@ -228,6 +252,8 @@ export class Submitter {
 
   private async submitCurrentValue(roundID: BN) {
 
+    // TODO: check price time
+
     // guard zero value
     if (this.currentValue.isZero()) {
       this.logger.warn("current value is zero. skip submit")
@@ -239,10 +265,17 @@ export class Submitter {
       return
     }
 
+    // Set reporting round to avoid report twice
+    // We also save the previousRound in case we fail to report this round, we will rollback and try again
+    // NOTE: by setting the reportedRound here, we avoid to create a Chainlink Submit Request twice
+    this.previousRound = this.reportedRound
+    this.reportedRound = roundID
+
+    this.logger.info("Submit to current round", { round: roundID.toString() })
+
     if (this.cfg.chainlink) {
       // prevent async race condition where submit could be called twice on the same round
-      this.reportedRound = roundID
-      return this.createChainlinkSubmitRequest(roundID);
+      return this.createChainlinkSubmitRequest(roundID)
     }
 
     return this.submitCurrentValueImpl(roundID)
@@ -252,41 +285,99 @@ export class Submitter {
 
     const value = this.currentValue
 
-    this.logger.info("Submit value", {
+    this.logger.info("Submitting value", {
       round: roundID.toString(),
       value: value.toString(),
     })
 
+    let txId = '';
     try {
-      // prevent async race condition where submit could be called twice on the same round
-      await this.program.submit({
-        accounts: {
-          aggregator: { write: this.aggregatorPK },
-          roundSubmissions: { write: this.aggregator.roundSubmissions },
-          answerSubmissions: { write: this.aggregator.answerSubmissions },
-          oracle: { write: this.oraclePK },
-          oracle_owner: this.oracleOwnerWallet.account,
-        },
-        round_id: roundID,
-        value,
-      })
-      this.reportedRound = roundID;
+      return await retryOperation(async (retryCount) => {        
+        try {
+          txId =  await this.program.submit({
+            accounts: {
+              aggregator: { write: this.aggregatorPK },
+              roundSubmissions: { write: this.aggregator.roundSubmissions },
+              answerSubmissions: { write: this.aggregator.answerSubmissions },
+              oracle: { write: this.oraclePK },
+              oracle_owner: this.oracleOwnerWallet.account,
+            },
+            round_id: roundID,
+            value,
+          })
 
-      this.reloadStates()
+          // check if this round submission is confirmed, if not, resubmit this round
+          const res = await conn.confirmTransaction(txId);
+          if(res.value.err) {
+            throw res.value.err;
+          }
 
-      this.logger.info("Submit OK", {
-        withdrawable: this.oracle.withdrawable.toString(),
-        rewardToken: this.aggregator.config.rewardTokenAccount.toString(),
-      })
+          metricOracleLastSubmittedPrice.set( {
+            submitter: this.oracle.description,
+            feed: this.aggregator.config.description,
+          }, value.toNumber() / 10 ** this.aggregator.config.decimals)
 
-      return {
-        roundID,
-        currentValue: value,
-      }
+          this.reloadStates()
+
+          this.logger.info("Submit OK", {
+            round: roundID.toString(),
+            value: value.toString(),
+            withdrawable: this.oracle.withdrawable.toString(),
+            rewardToken: this.aggregator.config.rewardTokenAccount.toString(),
+            retryCount,
+          })
+
+          this.lastSubmit.set(this.aggregatorPK.toBase58(), Date.now())
+
+          metricOracleSinceLastSubmitSeconds.set({
+            submitter: this.oracle.description,
+            feed: this.aggregator.config.description,
+          }, 0);
+
+          return {
+            roundID,
+            currentValue: value,
+          }
+        } catch (err) {
+          this.logger.info(`Submit confirmed failed`, {
+            round: roundID.toString(),
+            value: value.toString(),
+            err: err.toString(),
+            retryCount
+          })
+          // Check error and see if need to retry or we can ignore this error
+          switch (parseTransactionError(err)) {
+            case '6':
+            case '3':
+              this.errorNotifier.notifySoft('Submitter', `Each oracle may only submit once per round`, {
+                round: roundID.toString(),
+                aggregator: this.aggregator.config.description,
+                oracle: this.oraclePK.toString(),
+                txId,
+              }, err);
+              break;
+            default:
+              throw err;
+          }
+        }
+      }, 15000, 4)
     } catch (err) {
+      this.reportedRound = this.previousRound
+      this.reloadStates()
       this.logger.error("Submit error", {
+        round: roundID.toString(),
+        value: value.toString(),
+        aggregator: this.aggregator.config.description,
+        oracle: this.oraclePK.toString(),
         err: err.toString(),
+        txId,
       })
+      this.errorNotifier.notifyCritical('Submitter', `Oracle fail to submit a round`, {
+        round: roundID.toString(),
+        aggregator: this.aggregator.config.description,
+        oracle: this.oraclePK.toString(),
+        txId,
+      }, err);
     }
   }
 }
