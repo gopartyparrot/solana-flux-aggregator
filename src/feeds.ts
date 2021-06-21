@@ -569,6 +569,8 @@ export class AggregatedFeed {
     const values = prices
       // accept only prices > 0 that have been updated within 5 minutes
       .filter(price => price.value > 0 && price.time >= acceptedTime)
+      // Temporary ignore FTX prices from median
+      .filter(price => price.source !== FeedSource.FTX)
       .map((price) => price.value)
 
     return {
