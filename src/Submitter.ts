@@ -42,7 +42,6 @@ export class Submitter {
   public previousRound: BN
   public reportedRound: BN
   public lastSubmit = new Map<string, number>()
-  public lastSubmitTimeout = 60000 * 5; // 5m
 
   constructor(
     programID: PublicKey,
@@ -69,8 +68,6 @@ export class Submitter {
 
     await this.observeAggregatorState()
     await this.observePriceFeed()
-
-    // this.startStaleChecker()
   }
 
   // TODO: harvest rewards if > n
@@ -177,20 +174,6 @@ export class Submitter {
       
       await this.trySubmit()
     }
-  }
-
-  private startStaleChecker() {
-    if(!this.errorNotifier) {
-      return
-    }
-    setInterval(() => {
-      const now = Date.now()
-      for (const [key, value] of this.lastSubmit.entries()) {
-        if(now - value > this.lastSubmitTimeout) {
-          this.errorNotifier?.notifyCritical('Submitter', `No submit since ${new Date(value).toISOString()} for ${this.aggregator.config.description}`)
-        }
-      }
-    }, this.lastSubmitTimeout / 2)
   }
 
   private async trySubmit() {
