@@ -448,7 +448,7 @@ export class AggregatedFeed {
   public emitter = new EventEmitter()
   public prices: IPrice[] = []
   public logger: Logger
-  public lastUpdate = new Map<string, number>()
+  public lastUpdate = new Map<string, {feed: PriceFeed, updatedAt: number}>()
   public lastUpdateTimeout = 120000; // 2m
 
   // assume that the feeds are already connected
@@ -472,7 +472,7 @@ export class AggregatedFeed {
     let i = 0
     for (let feed of this.feeds) {
       feed.subscribe(pair)
-      this.lastUpdate.set(`${feed.source}-${pair}`, Date.now())
+      this.lastUpdate.set(`${feed.source}-${pair}`,{feed, updatedAt: Date.now()})
       this.logger.info('aggregated feed subscribed', { feed:feed.source })
 
       const index = i
@@ -486,12 +486,12 @@ export class AggregatedFeed {
 
         metricOracleFeedPrice.set( {
           submitter: this.oracleName,
-          feed: this.pair,
+          feed: pair,
           source: feed.source,
         }, price.value / 10 ** price.decimals)
 
         this.prices[index] = price
-        this.lastUpdate.set(`${feed.source}-${pair}`, Date.now())
+        this.lastUpdate.set(`${feed.source}-${pair}`, {feed, updatedAt: Date.now()})
         this.onPriceUpdate(price)
       })
     }
@@ -510,33 +510,33 @@ export class AggregatedFeed {
       return
     }
     setInterval(() => {
-
       // Check feeds websocket connection
       for (const feed of this.feeds) {
         if(feed.conn.readyState !== feed.conn.OPEN) {
           const meta = {
-            feed: feed.source,
+            feed: this.pair,
+            source: feed.source,
             submitter: this.oracleName
           }
           this.logger.error(`Websocket is not connected`, meta)
-          this.errorNotifier?.notifyCritical('AggregatedFeed', `Websocket is not connected`, meta)
+          this.errorNotifier?.notifyCritical('AggregatedFeed', `Websocket is not connected, try to reconnect`, meta)
+          feed.conn.reconnect()
         }
       }
 
-      // Check last update
+      // Check feeds last update event
       const now = Date.now()
-      for (const [key, value] of this.lastUpdate.entries()) {
-        if(now - value > this.lastUpdateTimeout) {
+      for (const feedInfo of this.lastUpdate.values()) {
+        if(now - feedInfo.updatedAt > this.lastUpdateTimeout) {
           const meta = {
-            feed: key,
+            feed: this.pair,
+            source: feedInfo.feed.source,
             submitter: this.oracleName,
-            lastUpdate: new Date(value).toISOString()
+            lastUpdate: new Date(feedInfo.updatedAt).toISOString()
           };
           this.logger.error(`No price data from websocket`, meta)
-          this.errorNotifier?.notifyCritical('AggregatedFeed', `No price data from websocket`, meta)
-          // force restart process
-          // TODO: close websocket
-          // process.exit(1);
+          this.errorNotifier?.notifyCritical('AggregatedFeed', `No price data from websocket, try to reconnect`, meta)
+          feedInfo.feed.conn.reconnect()
         }
       }
     }, this.lastUpdateTimeout / 2)
