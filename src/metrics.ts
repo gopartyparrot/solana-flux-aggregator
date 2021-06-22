@@ -31,8 +31,7 @@ export const metricOracleBalanceSol = new client.Gauge({
   labelNames: ['submitter']
 })
 
-
-
+// Register metrics
 register.registerMetric(metricOracleFeedPrice)
 register.registerMetric(metricOracleLastSubmittedPrice)
 register.registerMetric(metricOracleSinceLastSubmitSeconds)

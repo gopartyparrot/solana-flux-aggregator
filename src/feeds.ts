@@ -61,11 +61,11 @@ export abstract class PriceFeed {
       })
 
       conn.addEventListener("close", () => {
-        this.log.warn('ws closed', {source: this.source})
+        this.log.error('ws closed', {source: this.source})
       })
 
       conn.addEventListener("error", (err) => {
-        this.log.warn('ws error', {source: this.source, err})
+        this.log.error('ws error', {source: this.source, err})
       })
 
       conn.addEventListener("message", (msg) => {
@@ -523,20 +523,21 @@ export class AggregatedFeed {
       }
 
       // Check last update
-      // const now = Date.now()
-      // for (const [key, value] of this.lastUpdate.entries()) {
-      //   if(now - value > this.lastUpdateTimeout) {
-      //     const meta = {
-      //       feed: key,
-      //       submitter: this.oracleName,
-      //       lastUpdate: new Date(value).toISOString()
-      //     };
-      //     this.logger.error(`No price data from websocket`, meta)
-      //     this.errorNotifier?.notifyCritical('AggregatedFeed', `No price data from websocket`, meta)
-      //     // force restart process
-      //     process.exit(1);
-      //   }
-      // }
+      const now = Date.now()
+      for (const [key, value] of this.lastUpdate.entries()) {
+        if(now - value > this.lastUpdateTimeout) {
+          const meta = {
+            feed: key,
+            submitter: this.oracleName,
+            lastUpdate: new Date(value).toISOString()
+          };
+          this.logger.error(`No price data from websocket`, meta)
+          this.errorNotifier?.notifyCritical('AggregatedFeed', `No price data from websocket`, meta)
+          // force restart process
+          // TODO: close websocket
+          // process.exit(1);
+        }
+      }
     }, this.lastUpdateTimeout / 2)
   }
 
