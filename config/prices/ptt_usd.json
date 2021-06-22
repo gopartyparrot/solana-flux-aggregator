@@ -1,6 +1,6 @@
 {
   "source": "file",
-  "pair": "test:usd",
+  "pair": "ptt:usd",
   "decimals": 2,
-  "value": 110
+  "value": 105
 }

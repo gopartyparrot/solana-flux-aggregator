@@ -15,7 +15,7 @@
         "siskin"
       ]
     },
-    "test:usd": {
+    "ptt:usd": {
       "decimals": 2,
       "minSubmissions": 1,
       "maxSubmissions": 13,

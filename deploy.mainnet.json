@@ -57,7 +57,7 @@
       },
       "requesters": {}
     },
-    "test:usd": {
+    "ptt:usd": {
       "pubkey": {
         "type": "PublicKey",
         "base58": "5o3S9uVpJh2mkFW44GHtLuNjCFqFV1CumR2Q7mC44LFD"
@@ -67,7 +67,7 @@
         "base58": "948Bbcg3mUjSVeqeg54QC73BNJgtRdbFevYopDGeaSf6"
       },
       "config": {
-        "description": "test:usd",
+        "description": "ptt:usd",
         "decimals": 2,
         "roundTimeout": 0,
         "minSubmissions": 1,

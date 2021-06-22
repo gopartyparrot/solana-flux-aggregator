@@ -6,7 +6,7 @@
       "source": ["ftx", "coinbase"],
       "minValueChangeForNewRound": 1
     },
-    "test:usd": {
+    "ptt:usd": {
       "source": ["file"],
       "minValueChangeForNewRound": 1
     },
