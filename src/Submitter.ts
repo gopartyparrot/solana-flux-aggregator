@@ -152,7 +152,7 @@ export class Submitter {
         },
         price.value / 10 ** price.decimals
       )
-      const now = new Date().valueOf();
+      const now = Date.now();
       const lastSubmit = now - (this.lastSubmit.get(this.aggregatorPK.toBase58()) || now);
 
       metricOracleSinceLastSubmitSeconds.set(
@@ -258,7 +258,7 @@ export class Submitter {
   }
 
   private async submitCurrentValue(roundID: BN) {
-    const now = new Date().valueOf()
+    const now = Date.now();
     // guard zero value
     if (this.currentValue.isZero()) {
       this.logger.warn("current value is zero. skip submit")
