@@ -61,7 +61,7 @@ export class Submitter {
     this.currentValueUpdatedAt = 0
     this.previousRound = new BN(0)
     this.reportedRound = new BN(0)
-    this.lastSubmittedAt = 0
+    this.lastSubmittedAt = Date.now()
   }
 
   public async start() {
@@ -155,7 +155,7 @@ export class Submitter {
       )
 
       const now = Date.now()
-      const lastSubmit = now - (this.lastSubmittedAt || now)
+      const lastSubmit = now - this.lastSubmittedAt
       metricOracleSinceLastSubmitSeconds.set(
         {
           submitter: this.oracle.description,
