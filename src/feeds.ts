@@ -111,9 +111,9 @@ export abstract class PriceFeed {
 }
 
 export class BitStamp extends PriceFeed {
-  protected log = log.child({ class: BitStamp.name })
-  protected baseurl = "wss://ws.bitstamp.net"
   public source = FeedSource.BITSTAMP;
+  protected log = log.child({ class: this.source })
+  protected baseurl = "wss://ws.bitstamp.net"
 
   parseMessage(data) {
     const payload = JSON.parse(data)
@@ -145,7 +145,7 @@ export class BitStamp extends PriceFeed {
     const pair = channel.slice(0, 3) + ":" + channel.slice(3)
 
     const price: IPrice = {
-      source: BitStamp.name,
+      source: this.source,
       pair,
       decimals: 2,
       value: Math.floor(payload.data.price * 100),
@@ -171,9 +171,9 @@ export class BitStamp extends PriceFeed {
 }
 
 export class FTX extends PriceFeed {
-  protected log = log.child({ class: FTX.name })
-  protected baseurl = "wss://ftx.com/ws/"
   public source = FeedSource.FTX;
+  protected log = log.child({ class: this.source })
+  protected baseurl = "wss://ftx.com/ws/"
 
   parseMessage(data) {
     const payload = JSON.parse(data)
@@ -199,7 +199,7 @@ export class FTX extends PriceFeed {
     const pair = (payload.market as string).replace("/", ":").toLowerCase()
 
     const price: IPrice = {
-      source: FTX.name,
+      source: this.source,
       pair,
       decimals: 2,
       value: Math.floor(payload.data.last * 100),
@@ -224,9 +224,9 @@ export class FTX extends PriceFeed {
 }
 
 export class CoinBase extends PriceFeed {
-  protected log = log.child({ class: CoinBase.name })
-  protected baseurl = "wss://ws-feed.pro.coinbase.com"
   public source = FeedSource.COINBASE;
+  protected log = log.child({ class: this.source })
+  protected baseurl = "wss://ws-feed.pro.coinbase.com"
 
   parseMessage(data) {
     const payload = JSON.parse(data)
@@ -257,7 +257,7 @@ export class CoinBase extends PriceFeed {
     const pair = (payload.product_id as string).replace("-", ":").toLowerCase()
 
     const price: IPrice = {
-      source: CoinBase.name,
+      source: this.source,
       pair,
       decimals: 2,
       value: Math.floor(payload.price * 100),
@@ -282,9 +282,9 @@ export class CoinBase extends PriceFeed {
 }
 
 export class Binance extends PriceFeed {
-  protected log = log.child({ class: Binance.name })
-  protected baseurl = "wss://stream.binance.com/ws"
   public source = FeedSource.BINANCE;
+  protected log = log.child({ class: this.source })
+  protected baseurl = "wss://stream.binance.com/ws"
 
   parseMessage(data) {
     const payload = JSON.parse(data)
@@ -313,7 +313,7 @@ export class Binance extends PriceFeed {
     const pair = `${baseCurrency}:${quoteCurrency == 'busd' ? 'usd' : quoteCurrency}`;
 
     const price: IPrice = {
-      source: Binance.name,
+      source: this.source,
       pair,
       decimals: 2,
       value: Math.floor(payload.p * 100),
@@ -339,9 +339,9 @@ export class Binance extends PriceFeed {
   }
 }
 export class OKEx extends PriceFeed {
-  protected log = log.child({ class: OKEx.name })
-  protected baseurl = "wss://real.okex.com:8443/ws/v3"
   public source = FeedSource.OKEX;
+  protected log = log.child({ class: this.source })
+  protected baseurl = "wss://real.okex.com:8443/ws/v3"
 
   parseMessage(data) {
     const message = pako.inflate(data, { raw: true, to: 'string' });
@@ -379,7 +379,7 @@ export class OKEx extends PriceFeed {
     // assume that quote is always any form of usd/usdt/usdc so map to usd
     const pair = `${baseCurrency}:${quoteCurrency.slice(0, 3)}`;
     const price: IPrice = {
-      source: OKEx.name,
+      source: this.source,
       pair,
       decimals: 2,
       value: Math.floor(payload.data[0].last * 100),
@@ -406,9 +406,9 @@ export class OKEx extends PriceFeed {
 
 /** FilePriceFeed read price data from json file, for test or emergency feed */
 export class FilePriceFeed extends PriceFeed {
-  protected log = log.child({ class: FilePriceFeed.name })
-  protected baseurl = "unused"
   public source = FeedSource.FILE;
+  protected log = log.child({ class: this.source })
+  protected baseurl = "unused"
 
   constructor(public tickMillisecond: number, protected baseDir: string) {
     super();
