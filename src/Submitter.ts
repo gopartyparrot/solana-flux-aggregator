@@ -42,7 +42,7 @@ export class Submitter {
   public currentValueUpdatedAt: number
   public previousRound: BN
   public reportedRound: BN
-  public lastSubmit = new Map<string, number>()
+  public lastSubmittedAt: number
 
   static ValueExpireTime = 60000 * 5 // 5mins
 
@@ -61,6 +61,7 @@ export class Submitter {
     this.currentValueUpdatedAt = 0
     this.previousRound = new BN(0)
     this.reportedRound = new BN(0)
+    this.lastSubmittedAt = Date.now()
   }
 
   public async start() {
@@ -142,7 +143,7 @@ export class Submitter {
       // TODO: save price as currentValue, in submitCurrentValue check price.time
       // Do not submit price older then 5 minutes
       this.currentValue = new BN(price.value)
-      this.currentValueUpdatedAt = price.time;
+      this.currentValueUpdatedAt = price.time
 
       metricOracleFeedPrice.set(
         {
@@ -152,9 +153,9 @@ export class Submitter {
         },
         price.value / 10 ** price.decimals
       )
-      const now = Date.now();
-      const lastSubmit = now - (this.lastSubmit.get(this.aggregatorPK.toBase58()) || now);
 
+      const now = Date.now()
+      const lastSubmit = now - this.lastSubmittedAt
       metricOracleSinceLastSubmitSeconds.set(
         {
           submitter: this.oracle.description,
@@ -237,7 +238,7 @@ export class Submitter {
 
   private async createChainlinkSubmitRequest(roundID: BN) {
     if(!this.cfg.chainlink) {
-      return;
+      return
     }
 
     try {
@@ -253,12 +254,12 @@ export class Submitter {
           }
         })
     } catch(error) {
-      this.logger.error('response', error);
+      this.logger.error('response', error)
     }
   }
 
   private async submitCurrentValue(roundID: BN) {
-    const now = Date.now();
+    const now = Date.now()
     // guard zero value
     if (this.currentValue.isZero()) {
       this.logger.warn("current value is zero. skip submit")
@@ -303,7 +304,7 @@ export class Submitter {
       value: value.toString(),
     })
 
-    let txId = '';
+    let txId = ''
     try {
       return await retryOperation(async (retryCount) => {
           try {
@@ -320,9 +321,9 @@ export class Submitter {
             })
 
             // check if this round submission is confirmed, if not, resubmit this round
-            const res = await conn.confirmTransaction(txId);
+            const res = await conn.confirmTransaction(txId)
             if(res.value.err) {
-              throw res.value.err;
+              throw res.value.err
             }
 
             metricOracleLastSubmittedPrice.set( {
@@ -340,12 +341,11 @@ export class Submitter {
               retryCount,
             })
 
-            this.lastSubmit.set(this.aggregatorPK.toBase58(), Date.now())
-
+            this.lastSubmittedAt = Date.now()
             metricOracleSinceLastSubmitSeconds.set({
                 submitter: this.oracle.description,
                 feed: this.aggregator.config.description,
-              }, 0);
+              }, 0)
 
             return {
               roundID,
@@ -367,10 +367,10 @@ export class Submitter {
                     aggregator: this.aggregator.config.description,
                     oracle: this.oraclePK.toString(),
                     txId,
-                  }, err);
-                break;
+                  }, err)
+                break
               default:
-                throw err;
+                throw err
             }
           }
         }, 15000, 4)
@@ -390,7 +390,7 @@ export class Submitter {
           aggregator: this.aggregator.config.description,
           oracle: this.oraclePK.toString(),
           txId,
-        }, err);
+        }, err)
     }
   }
 }
