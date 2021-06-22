@@ -142,13 +142,26 @@ export class Submitter {
       // TODO: save price as currentValue, in submitCurrentValue check price.time
       // Do not submit price older then 5 minutes
       this.currentValue = new BN(price.value)
-      this.currentValueUpdatedAt = new Date().valueOf();
+      this.currentValueUpdatedAt = price.time;
 
-      metricOracleFeedPrice.set({
-        submitter: this.oracle.description,
-        feed: price.pair,
-        source: price.source,
-      }, price.value / 10 ** price.decimals)
+      metricOracleFeedPrice.set(
+        {
+          submitter: this.oracle.description,
+          feed: price.pair,
+          source: price.source
+        },
+        price.value / 10 ** price.decimals
+      )
+      const now = new Date().valueOf();
+      const lastSubmit = now - (this.lastSubmit.get(this.aggregatorPK.toBase58()) || now);
+
+      metricOracleSinceLastSubmitSeconds.set(
+        {
+          submitter: this.oracle.description,
+          feed: this.aggregator.config.description
+        },
+        Math.floor(lastSubmit / 1000)
+      )
 
       const valueDiff = this.aggregator.answer.median
         .sub(this.currentValue)
@@ -265,17 +278,6 @@ export class Submitter {
       this.logger.debug("don't report to the same round twice")
       return
     }
-
-    const lastSubmit =
-      now - (this.lastSubmit.get(this.aggregatorPK.toBase58()) || now)
-
-    metricOracleSinceLastSubmitSeconds.set(
-      {
-        submitter: this.oracle.description,
-        feed: this.aggregator.config.description
-      },
-      Math.floor(lastSubmit / 1000)
-    )
 
     // Set reporting round to avoid report twice
     // We also save the previousRound in case we fail to report this round, we will rollback and try again
