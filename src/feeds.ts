@@ -178,6 +178,7 @@ export class FTX extends PriceFeed {
   parseMessage(data) {
     const payload = JSON.parse(data)
 
+    // ticker channel
     // {
     //   "channel": "ticker",
     //   "market": "BTC/USD",
@@ -192,19 +193,37 @@ export class FTX extends PriceFeed {
     //   }
     // }
 
-    if (payload.type != "update" || payload.channel != "ticker") {
+    // trades channel
+    // {
+    //   channel: 'trades',
+    //   market: 'SOL/USD',
+    //   type: 'update',
+    //   data: [
+    //     {
+    //       id: 1342006789,
+    //       price: 29.86,
+    //       size: 205.3,
+    //       side: 'buy',
+    //       liquidation: false,
+    //       time: '2021-06-23T03:10:03.669178+00:00'
+    //     },
+    //   ]
+    // }
+        
+    if (payload.type != "update" || payload.channel != "trades") {
       return
     }
 
     const pair = (payload.market as string).replace("/", ":").toLowerCase()
+    const lastTrade = payload.data.pop()
 
     const price: IPrice = {
       source: this.source,
       pair,
       decimals: 2,
-      value: Math.floor(payload.data.last * 100),
+      value: Math.floor(lastTrade.price * 100),
       time: Date.now(),
-    }
+    }    
 
     return price
   }
@@ -216,7 +235,7 @@ export class FTX extends PriceFeed {
     this.conn.send(
       JSON.stringify({
         op: "subscribe",
-        channel: "ticker",
+        channel: "trades",
         market: targetPair,
       })
     )
