@@ -68,6 +68,7 @@ export class Submitter {
     await this.reloadStates()
 
     this.logger = log.child({
+      oracle: this.oracle.description,
       aggregator: this.aggregator.config.description,
     })
 
