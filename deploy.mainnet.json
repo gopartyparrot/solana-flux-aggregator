@@ -90,6 +90,16 @@
             "type": "PublicKey",
             "base58": "2uXiqUavNfVADitNHBo986EmBnSXQ5gMLH9KPKaQmTBM"
           }
+        },
+        "goldfinch": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "8oTjxQmaeLZ67CrjSjpW3eiGZRSakbkpA7gW37btSiyR"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "5PumoPt8czaT3CrW1RNioSj7PJXpKvczUvVbctAdCkRT"
+          }
         }
       },
       "requesters": {}
