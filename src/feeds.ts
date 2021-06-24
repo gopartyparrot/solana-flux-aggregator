@@ -474,11 +474,12 @@ export class AggregatedFeed {
   constructor(
     public feeds: PriceFeed[], 
     public pair: string, 
-    private oracleName: string,
+    private oracle: string,
     private errorNotifier?: ErrorNotifier
   ) {
     this.logger = log.child({
-      pair
+      oracle: oracle,
+      aggregator: pair,
     })
 
     this.subscribe()
@@ -504,7 +505,7 @@ export class AggregatedFeed {
         }
 
         metricOracleFeedPrice.set( {
-          submitter: this.oracleName,
+          submitter: this.oracle,
           feed: pair,
           source: feed.source,
         }, price.value / 10 ** price.decimals)
@@ -535,7 +536,7 @@ export class AggregatedFeed {
           const meta = {
             feed: this.pair,
             source: feed.source,
-            submitter: this.oracleName
+            submitter: this.oracle
           }
           this.logger.error(`Websocket is not connected`, meta)
           this.errorNotifier?.notifyCritical('AggregatedFeed', `Websocket is not connected, try to reconnect`, meta)
@@ -550,7 +551,7 @@ export class AggregatedFeed {
           const meta = {
             feed: this.pair,
             source: feedInfo.feed.source,
-            submitter: this.oracleName,
+            submitter: this.oracle,
             lastUpdate: new Date(feedInfo.updatedAt).toISOString()
           };
           this.logger.error(`No price data from websocket`, meta)
