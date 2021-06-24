@@ -61,7 +61,7 @@ export abstract class PriceFeed {
       })
 
       conn.addEventListener("close", () => {
-        this.log.error('ws closed', {source: this.source})
+        this.log.info('ws closed', {source: this.source})
       })
 
       conn.addEventListener("error", (err) => {
