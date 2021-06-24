@@ -25,7 +25,8 @@
       "rewardAmount": 10000,
       "rewardTokenAccount": "3oLHHTaRqNsuTMjsTtkVy8bock6Bx8gCmDxku4TurVj1",
       "oracles": [
-        "mallard"
+        "mallard",
+        "goldfinch"
       ]
     }
   },
