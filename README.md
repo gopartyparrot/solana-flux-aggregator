@@ -123,8 +123,9 @@ Observe the devnet prices by running:
 NETWORK=dev DEPLOY_FILE=deploy.dev.json yarn solink observe
 ```
 
-* `btc:usd` => HBVsLHp8mWGMGfrh1Gf5E8RAxww71mXBgoZa6Zvsk5cK
-* `eth:usd` => CifT9HWU1W3VyzdWqaKGcarBLdZGKbbP9h65c7vwxF5d
+* `btc:usd` => 56q8nUrG1VM61rryFUEV32Yf9XqyUeZxqPYJJefXdUL
+* `eth:usd` => D7LXhzGHaMM6DUViyiJqah38i89ssMBryJysBX4efC5B
+* `sol:usd` => 8APHYXJrL4yegAX4q8EcGb3FmYWvSr7tVunicuBRLSMT
 
 ## Using Your Own RPC
 
@@ -138,6 +139,17 @@ Configure in `.env`:
 ```
 # (Optional) Specify the RPC host you want to use for your network
 SOLANA_RPC_HOST=http://localhost:8899
+```
+
+## Upgrade the program
+
+```sh
+cargo build-bpf
+
+solana program deploy --url https://api.devnet.solana.com \
+    --keypair ~/.config/solana/id.json \
+    --program-id 7opMWJtYivjuieo3C176p2V1Tbs3csxjeAUjwmsBNitW \
+    target/deploy/flux_aggregator.so
 ```
 
 ## Joining Devnet
