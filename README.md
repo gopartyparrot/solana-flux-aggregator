@@ -146,10 +146,21 @@ SOLANA_RPC_HOST=http://localhost:8899
 ```sh
 cargo build-bpf
 
-solana program deploy --url https://api.devnet.solana.com \
-    --keypair ~/.config/solana/id.json \
-    --program-id 7opMWJtYivjuieo3C176p2V1Tbs3csxjeAUjwmsBNitW \
-    target/deploy/flux_aggregator.so
+solana program deploy \
+        --url https://api.devnet.solana.com \
+        --keypair ~/.config/solana/id.json \
+        --program-id 7opMWJtYivjuieo3C176p2V1Tbs3csxjeAUjwmsBNitW \
+        target/deploy/flux_aggregator.so
+```
+
+
+## Change program upgrade authority
+
+```sh
+solana program set-upgrade-authority <program_id> \
+        --url https://api.devnet.solana.com \
+        --upgrade-authority ~/.config/solana/id.json \
+        --new-upgrade-authority <new_owner>
 ```
 
 ## Joining Devnet

@@ -554,7 +554,7 @@ export class AggregatedFeed {
             submitter: this.oracle,
             lastUpdate: new Date(feedInfo.updatedAt).toISOString()
           };
-          this.logger.error(`No price data from websocket`, meta)
+          this.logger.error(`No price data from websocket, call reconnect`, meta)
           this.errorNotifier?.notifyCritical('AggregatedFeed', `No price data from websocket, try to reconnect`, meta)
           feedInfo.feed.conn.reconnect()
         }

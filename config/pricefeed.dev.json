@@ -14,6 +14,14 @@
         "source": ["coinbase", "ftx"],
         "minValueChangeForNewRound": 10
       },
+      "usdc:btc": {
+        "source": ["coinbase", "binance"],
+        "minValueChangeForNewRound": 500
+      },
+      "usdt:btc": {
+        "source": ["coinbase", "binance"],
+        "minValueChangeForNewRound": 500
+      },
       "default": {
         "source": [],
         "minValueChangeForNewRound": 100

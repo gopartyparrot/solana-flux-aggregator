@@ -2,9 +2,9 @@
   "_description": "configure witch feeds to use for pair, and other param",
   "priceFileDir": "./config/prices",
   "submitter": {
-    "ptt:usd": {
-      "source": ["file"],
-      "minValueChangeForNewRound": 1
+    "usdc:btc": {
+      "source": ["binance"],
+      "minValueChangeForNewRound": 500
     },
     "default": {
       "source": [],

@@ -363,6 +363,9 @@ export class Submitter {
             switch (parseTransactionError(err)) {
               case '6':
               case '3':
+                // do not retry for this errors, do not throw err but reload the states to get new roundID
+                this.reportedRound = this.previousRound
+                this.reloadStates()
                 this.errorNotifier.notifySoft('Submitter', `Each oracle may only submit once per round`, {
                     round: roundID.toString(),
                     aggregator: this.aggregator.config.description,
