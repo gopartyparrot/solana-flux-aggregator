@@ -15,11 +15,11 @@
         "minValueChangeForNewRound": 10
       },
       "usdc:btc": {
-        "source": ["coinbase", "binance"],
+        "source": ["coinbase_inverse", "binance_inverse"],
         "minValueChangeForNewRound": 500
       },
       "usdt:btc": {
-        "source": ["coinbase", "binance"],
+        "source": ["coinbase_inverse", "binance_inverse"],
         "minValueChangeForNewRound": 500
       },
       "default": {

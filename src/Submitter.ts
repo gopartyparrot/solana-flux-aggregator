@@ -6,10 +6,10 @@ import { getAccounts, parseTransactionError, retryOperation } from "./utils"
 import FluxAggregator from "./FluxAggregator"
 import {  Logger } from "winston"
 import { log } from "./log"
-import { IPriceFeed } from "./feeds"
 import axios from "axios"
 import { ErrorNotifier } from "./ErrorNotifier"
 import { metricOracleFeedPrice, metricOracleLastSubmittedPrice, metricOracleSinceLastSubmitSeconds } from "./metrics"
+import { IPriceFeed } from "./feeds/PriceFeed"
 
 // allow oracle to start a new round after this many slots. each slot is about 500ms
 const MAX_ROUND_STALENESS = 10
@@ -146,6 +146,8 @@ export class Submitter {
       this.currentValue = new BN(price.value)
       this.currentValueUpdatedAt = price.time
 
+      console.log('currentValue',price );
+
       metricOracleFeedPrice.set(
         {
           submitter: this.oracle.description,
@@ -169,6 +171,9 @@ export class Submitter {
         .sub(this.currentValue)
         .abs()
 
+        console.log('valueDiff', valueDiff.toString());
+        
+
       if (valueDiff.lten(this.cfg.minValueChangeForNewRound)) {
         this.logger.debug("price did not change enough to start a new round", {
           diff: valueDiff.toNumber(),
@@ -190,6 +195,9 @@ export class Submitter {
 
     const { round } = this.aggregator
 
+    console.log('canSubmitToCurrentRound',this.canSubmitToCurrentRound );
+
+
     if (this.canSubmitToCurrentRound) {
       await this.submitCurrentValue(round.id)
       return
@@ -200,7 +208,7 @@ export class Submitter {
     if (sinceLastUpdate.ltn(MAX_ROUND_STALENESS)) {
       // round is not stale yet. don't submit new round
       return
-    }
+    }    
 
     // The round is stale. start a new round if possible, or wait for another
     // oracle to start
@@ -267,6 +275,8 @@ export class Submitter {
       return
     }
 
+    console.log('currentValue', this.currentValue.toString());
+    
     if (now - this.currentValueUpdatedAt > Submitter.ValueExpireTime) {
       this.logger.warn(
         `current value has expired ${
@@ -277,7 +287,7 @@ export class Submitter {
     }
 
     if (this.isRoundReported(roundID)) {
-      this.logger.debug("don't report to the same round twice")
+      this.logger.warn("don't report to the same round twice")
       return
     }
 

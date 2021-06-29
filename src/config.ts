@@ -77,14 +77,18 @@ export interface SolinkConfig {
 
 interface SolinkSubmitterConfig {
   source?: FeedSource[]
+  inverse?: boolean
   minValueChangeForNewRound: number
 }
 
 export enum FeedSource {
   COINBASE = "coinbase",
+  COINBASE_INVERSE = "coinbase_inverse",
   FTX = "ftx",
+  FTX_INVERSE = 'ftx_inverse',
   BITSTAMP = "bitstamp",
   BINANCE = "binance",
+  BINANCE_INVERSE = "binance_inverse",
   OKEX = "okex",
   FILE = "file",
 }
