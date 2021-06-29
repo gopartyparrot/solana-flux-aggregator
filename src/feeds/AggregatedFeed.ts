@@ -151,6 +151,7 @@ export class AggregatedFeed {
     const now = Date.now()
     const acceptedTime = now - 2 * 60 * 1000 // 5 minutes ago
 
+
     const values = prices
       // accept only prices > 0 that have been updated within 5 minutes
       .filter(price => price.value > 0 && price.time >= acceptedTime)

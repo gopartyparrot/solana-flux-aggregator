@@ -96,12 +96,6 @@ export class Submitter {
         this.aggregator = await Aggregator.load(this.aggregatorPK)
       }
 
-      console.log('this.aggregator', this.aggregator);
-      console.log('this.roundSubmissions', this.aggregator.roundSubmissions.toString());
-      console.log('this.answerSubmissions', this.aggregator.answerSubmissions.toString());
-      console.log('this.oraclePK', this.oraclePK.toString());
-      
-
       const [
         oracle,
         roundSubmissions,
@@ -115,11 +109,9 @@ export class Submitter {
       this.oracle = Oracle.deserialize(oracle.data)
       this.answerSubmissions = Submissions.deserialize(answerSubmissions.data)
       this.roundSubmissions = Submissions.deserialize(roundSubmissions.data)
-    } catch(err) {
-      console.log('err', err);
-      
+    } catch(err) {      
       this.logger.error('Error in ReloadStates', err)
-      // throw err
+      throw err
     }
   }
 
@@ -142,7 +134,7 @@ export class Submitter {
   }
 
   private async observePriceFeed() {
-    for await (let price of this.priceFeed) {
+    for await (let price of this.priceFeed) {      
       if (price.decimals != this.aggregator.config.decimals) {
         throw new Error(
           `Expect price with decimals of ${this.aggregator.config.decimals} got: ${price.decimals}`
@@ -153,8 +145,6 @@ export class Submitter {
       // Do not submit price older then 5 minutes
       this.currentValue = new BN(price.value)
       this.currentValueUpdatedAt = price.time
-
-      console.log('currentValue',price );
 
       metricOracleFeedPrice.set(
         {
@@ -177,10 +167,7 @@ export class Submitter {
 
       const valueDiff = this.aggregator.answer.median
         .sub(this.currentValue)
-        .abs()
-
-        console.log('valueDiff', valueDiff.toString());
-        
+        .abs()        
 
       if (valueDiff.lten(this.cfg.minValueChangeForNewRound)) {
         this.logger.debug("price did not change enough to start a new round", {
@@ -202,9 +189,6 @@ export class Submitter {
     this.logger.debug("oracle", { oracle: this.oracle })
 
     const { round } = this.aggregator
-
-    console.log('canSubmitToCurrentRound',this.canSubmitToCurrentRound );
-
 
     if (this.canSubmitToCurrentRound) {
       await this.submitCurrentValue(round.id)
@@ -282,8 +266,6 @@ export class Submitter {
       this.logger.warn("current value is zero. skip submit")
       return
     }
-
-    console.log('currentValue', this.currentValue.toString());
     
     if (now - this.currentValueUpdatedAt > Submitter.ValueExpireTime) {
       this.logger.warn(
