@@ -110,8 +110,10 @@ export class Submitter {
       this.answerSubmissions = Submissions.deserialize(answerSubmissions.data)
       this.roundSubmissions = Submissions.deserialize(roundSubmissions.data)
     } catch(err) {
+      console.log('err', err);
+      
       this.logger.error('Error in ReloadStates', err)
-      throw err
+      // throw err
     }
   }
 
