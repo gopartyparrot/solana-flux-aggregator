@@ -96,6 +96,12 @@ export class Submitter {
         this.aggregator = await Aggregator.load(this.aggregatorPK)
       }
 
+      console.log('this.aggregator', this.aggregator);
+      console.log('this.roundSubmissions', this.aggregator.roundSubmissions.toString());
+      console.log('this.answerSubmissions', this.aggregator.answerSubmissions.toString());
+      console.log('this.oraclePK', this.oraclePK.toString());
+      
+
       const [
         oracle,
         roundSubmissions,
