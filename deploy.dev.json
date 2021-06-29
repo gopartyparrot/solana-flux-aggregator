@@ -264,7 +264,7 @@
     "usdt:btc": {
       "pubkey": {
         "type": "PublicKey",
-        "base58": "7Src962kKKhiBtKdZ1jVxKMepBtVBdatjDfEdm5dQibs"
+        "base58": "6sJySjCfn9X1CwmvRdqLLxKktJZiEyJriR9hs8hfVjKt"
       },
       "owner": {
         "type": "PublicKey",
@@ -272,7 +272,7 @@
       },
       "config": {
         "description": "usdt:btc",
-        "decimals": 2,
+        "decimals": 8,
         "roundTimeout": 0,
         "minSubmissions": 1,
         "maxSubmissions": 13,
@@ -288,7 +288,7 @@
         "octopus": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "6DP1qbDYXAAJ8q5LG1Y2aqPdAVSa6fAgUyRfHUP1xnhx"
+            "base58": "3VUv1R2XWqL7MSQotma24CAq86W3PR4ninuh69LdicYG"
           },
           "owner": {
             "type": "PublicKey",
@@ -298,7 +298,7 @@
         "parrot": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "7Gz7DdSK311rXSsnzNQka7oCAHBumbtgMFdnFB5BH71K"
+            "base58": "5buo2EgzxHhk1QU12g9MwhkqHh6XTYWG6FRD87rJWGo9"
           },
           "owner": {
             "type": "PublicKey",
@@ -308,7 +308,7 @@
         "solink": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "AebDDJPoWrwjzSsagf3DCTf8TfG7Q6WRwtAayqN4K2vH"
+            "base58": "8ykT4unZLryNKoFKecpJaW8wFYKZaSLjyLV9zRhNVRjM"
           },
           "owner": {
             "type": "PublicKey",
@@ -318,7 +318,7 @@
         "osprey": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "44bnV6N6U5ohEYTqRNWdqH6uqE4NyiDca8xcmTtdqrqo"
+            "base58": "8s2XUWqCST9sQZQN6JL8Kr8NH26MdVa1D9TZcrZmu1WE"
           },
           "owner": {
             "type": "PublicKey",
@@ -328,7 +328,7 @@
         "dunlin": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "Ae8R8SRwvi2EZXbjT1BSAnn86Ss9Kb9Egzy9T1VoGAee"
+            "base58": "3xpJ7pNYQdDWvKqZ9UZeejkBTims122FgCD6diYtjz7u"
           },
           "owner": {
             "type": "PublicKey",
@@ -338,7 +338,7 @@
         "gadwall": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "7honNvheAsYm3NwGDftG43ZXXnQjuUGbFJoCLWHYoFkz"
+            "base58": "FumztfwjfsBe5jCUSsMbyxsyTx6o7PKn1dkPPzTx1exG"
           },
           "owner": {
             "type": "PublicKey",
@@ -351,7 +351,7 @@
     "usdc:btc": {
       "pubkey": {
         "type": "PublicKey",
-        "base58": "EmWdCquGQqGoSaYeYqwD4VCUBdf1eKkD2XuymnmtQJT1"
+        "base58": "8L74kVQkZYnvQYz9KLt4G2DLgSXmkky3rLzfAEmfRP7N"
       },
       "owner": {
         "type": "PublicKey",
@@ -359,7 +359,7 @@
       },
       "config": {
         "description": "usdc:btc",
-        "decimals": 2,
+        "decimals": 8,
         "roundTimeout": 0,
         "minSubmissions": 1,
         "maxSubmissions": 13,
@@ -375,7 +375,7 @@
         "octopus": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "F1GCP6THqPEt5u5Kixjy5i6L954ZfpjvQSM73RTwqgkd"
+            "base58": "FKrHgYAz4V1YeTQe4Y8GiTQ2XACQtkNrqsQNT52JtM7a"
           },
           "owner": {
             "type": "PublicKey",
@@ -385,7 +385,7 @@
         "parrot": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "HCfhUn9vVv6BH9y5UaYokJBHF2SNLG9P2S4S7guRZSea"
+            "base58": "7jm7ecLuGzsiFYQnsxxrYqniGYv3EiABTEq5us31L3Ad"
           },
           "owner": {
             "type": "PublicKey",
@@ -395,7 +395,7 @@
         "solink": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "J4tphFG5HRU5JDd35ePjBgRBqeGLt8uqNXhZGHYMbSKd"
+            "base58": "p3KAdbbUtHXH48uTV7Jp1W3vvUBoqrQm5kPDv1xsY1T"
           },
           "owner": {
             "type": "PublicKey",
@@ -405,7 +405,7 @@
         "osprey": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "ERYdJPkhPwgBnXKNNyV717jVf85ZUpsoq5nhracjxX2c"
+            "base58": "F4JgC2dy6PxSMMK6vu4akRUwWBTX5aLfKU3nNeThKe7v"
           },
           "owner": {
             "type": "PublicKey",
@@ -415,7 +415,7 @@
         "dunlin": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "5HzeCo8CqiY2zEyarcofP9HhCsy1aaMNUUDHRwcrpzTp"
+            "base58": "79UP1zpBrB7QFRBn46asr36mQWq8PhuhYky7wmio5jUb"
           },
           "owner": {
             "type": "PublicKey",
@@ -425,7 +425,7 @@
         "gadwall": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "5fCZW7GtzEoxQHgr4DxdnG1AV3dqBWQdW7Wah2tQNb4d"
+            "base58": "Hsk3qpcD5isaBg8zY5xVfurZLZ2EtmyLN9yyhykfqy8B"
           },
           "owner": {
             "type": "PublicKey",
