@@ -3,7 +3,11 @@
   "priceFileDir": "./config/prices",
   "submitter": {
     "usdt:btc": {
-      "source": ["ftx_inverse"],
+      "source": ["coinbase_inverse"],
+      "minValueChangeForNewRound": 1
+    },
+    "usdc:btc": {
+      "source": ["coinbase_inverse"],
       "minValueChangeForNewRound": 1
     },
     "default": {

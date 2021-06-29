@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js'
 import EventEmitter from 'events'
 import ReconnectingWebSocket from 'reconnecting-websocket'
 import winston from 'winston'

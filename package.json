@@ -20,7 +20,6 @@
     "@sentry/tracing": "^6.7.0",
     "@solana/web3.js": "^0.90.5",
     "axios": "0.21.1",
-    "bignumber.js": "9.0.1",
     "borsh": "https://github.com/defactojob/borsh-js#field-mapper",
     "buffer-layout": "^1.2.0",
     "commander": "^6.2.0",
