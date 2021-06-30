@@ -8,7 +8,7 @@ import {  Logger } from "winston"
 import { log } from "./log"
 import axios from "axios"
 import { ErrorNotifier } from "./ErrorNotifier"
-import { metricOracleFeedPrice, metricOracleLastSubmittedPrice, metricOracleSinceLastSubmitSeconds } from "./metrics"
+import { metricOracleFeedPrice, metricOracleLastSubmittedPrice, metricOracleSinceLastSubmitSeconds, metricOracleSubmitRetryCount } from "./metrics"
 import { IPriceFeed } from "./feeds/PriceFeed"
 
 // allow oracle to start a new round after this many slots. each slot is about 500ms
@@ -374,6 +374,10 @@ export class Submitter {
                   }, err)
                 break
               default:
+                metricOracleSubmitRetryCount.labels(
+                  this.oracle.description, 
+                  this.aggregator.config.description
+                ).inc();
                 throw err
             }
           }

@@ -14,6 +14,7 @@ integration-example/Cargo.lock
 .vscode/launch.json
 config/setup.local.json
 config/setup.private.json
+config/pricefeed.private.json
 deploy.local.json
 deploy.private.json
 telegram.bot.json

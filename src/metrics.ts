@@ -25,6 +25,12 @@ export const metricOracleSinceLastSubmitSeconds = new client.Gauge({
   labelNames: ['submitter', 'feed']
 })
 
+export const metricOracleSubmitRetryCount = new client.Counter({
+  name: 'oracle_submit_retry_count',
+  help: 'Oracle submit retries due to errors',
+  labelNames: ['submitter', 'feed']
+})
+
 export const metricOracleBalanceSol = new client.Gauge({
   name: 'oracle_balance_sol',
   help: 'Oracle owner balance in SOL',
@@ -35,6 +41,7 @@ export const metricOracleBalanceSol = new client.Gauge({
 register.registerMetric(metricOracleFeedPrice)
 register.registerMetric(metricOracleLastSubmittedPrice)
 register.registerMetric(metricOracleSinceLastSubmitSeconds)
+register.registerMetric(metricOracleSubmitRetryCount)
 register.registerMetric(metricOracleBalanceSol)
 
 // Define the HTTP server
