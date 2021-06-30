@@ -6,6 +6,10 @@
       "source": ["ftx", "coinbase"],
       "minValueChangeForNewRound": 10
     },
+    "usdc:btc": {
+      "source": ["coinbase_inverse"],
+      "minValueChangeForNewRound": 100
+    },
     "default": {
       "source": [],
       "minValueChangeForNewRound": 100
