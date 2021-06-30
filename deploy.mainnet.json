@@ -107,7 +107,7 @@
     "usdc:btc": {
       "pubkey": {
         "type": "PublicKey",
-        "base58": "7me8M8y7dp3f9JLcsZYFCDNgBjD8Xm6YoujTTLzzAA55"
+        "base58": "EjwENJ2jbJ9psKeapDezu5oKQe9chnU4wQJFE4ufymDs"
       },
       "owner": {
         "type": "PublicKey",
@@ -115,7 +115,7 @@
       },
       "config": {
         "description": "usdc:btc",
-        "decimals":8,
+        "decimals": 8,
         "roundTimeout": 0,
         "minSubmissions": 1,
         "maxSubmissions": 13,
@@ -131,7 +131,7 @@
         "mallard": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "AftXGSfZg9cfgK5o9aeUdBzQR8TNUmTgozSZgRNbaRG5"
+            "base58": "7me8M8y7dp3f9JLcsZYFCDNgBjD8Xm6YoujTTLzzAA55"
           },
           "owner": {
             "type": "PublicKey",
