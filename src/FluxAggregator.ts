@@ -176,7 +176,6 @@ export default class FluxAggregator extends BaseProgram {
     )
   }
 
-
   public async addOracle(params: AddOracleParams): Promise<Account> {
     const oracle = new Account()
 

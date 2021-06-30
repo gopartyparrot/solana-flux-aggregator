@@ -260,6 +260,180 @@
         }
       },
       "requesters": {}
+    },
+    "usdt:btc": {
+      "pubkey": {
+        "type": "PublicKey",
+        "base58": "6sJySjCfn9X1CwmvRdqLLxKktJZiEyJriR9hs8hfVjKt"
+      },
+      "owner": {
+        "type": "PublicKey",
+        "base58": "2FQ8z8GGv5RjqNNwukF8DpBFbsgS6d1FmqwP42GEhFVF"
+      },
+      "config": {
+        "description": "usdt:btc",
+        "decimals": 8,
+        "roundTimeout": 0,
+        "minSubmissions": 1,
+        "maxSubmissions": 13,
+        "restartDelay": 0,
+        "requesterRestartDelay": 0,
+        "rewardTokenAccount": {
+          "type": "PublicKey",
+          "base58": "3oLHHTaRqNsuTMjsTtkVy8bock6Bx8gCmDxku4TurVj1"
+        },
+        "rewardAmount": 10000
+      },
+      "oracles": {
+        "octopus": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "3VUv1R2XWqL7MSQotma24CAq86W3PR4ninuh69LdicYG"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "HiPL676Z6XTgqsbjMbY25YNRzM7ag1uPddqneLuxLFHS"
+          }
+        },
+        "parrot": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "5buo2EgzxHhk1QU12g9MwhkqHh6XTYWG6FRD87rJWGo9"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "9C5ExKWtgVot8dGN5aVw8tDASDFupDdvA9E28Dh99US5"
+          }
+        },
+        "solink": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "8ykT4unZLryNKoFKecpJaW8wFYKZaSLjyLV9zRhNVRjM"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "2pafGWojtMy1Hf1mk9zzjCLRTsePSJEEzCuq8Bys5fhi"
+          }
+        },
+        "osprey": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "8s2XUWqCST9sQZQN6JL8Kr8NH26MdVa1D9TZcrZmu1WE"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "31KsByHNYuqJt5foAMM522vHaz1z3gHzufw43HaGHVVv"
+          }
+        },
+        "dunlin": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "3xpJ7pNYQdDWvKqZ9UZeejkBTims122FgCD6diYtjz7u"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "Af3yNckZXttZ4c49EDxPiL1psdLBY4KuKcE8CFxvuU3n"
+          }
+        },
+        "gadwall": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "FumztfwjfsBe5jCUSsMbyxsyTx6o7PKn1dkPPzTx1exG"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "54tDMY8BwgKaskPteKJ7X6ZDLRAwA27ACgiE9ahCuyjH"
+          }
+        }
+      },
+      "requesters": {}
+    },
+    "usdc:btc": {
+      "pubkey": {
+        "type": "PublicKey",
+        "base58": "8L74kVQkZYnvQYz9KLt4G2DLgSXmkky3rLzfAEmfRP7N"
+      },
+      "owner": {
+        "type": "PublicKey",
+        "base58": "2FQ8z8GGv5RjqNNwukF8DpBFbsgS6d1FmqwP42GEhFVF"
+      },
+      "config": {
+        "description": "usdc:btc",
+        "decimals": 8,
+        "roundTimeout": 0,
+        "minSubmissions": 1,
+        "maxSubmissions": 13,
+        "restartDelay": 0,
+        "requesterRestartDelay": 0,
+        "rewardTokenAccount": {
+          "type": "PublicKey",
+          "base58": "3oLHHTaRqNsuTMjsTtkVy8bock6Bx8gCmDxku4TurVj1"
+        },
+        "rewardAmount": 10000
+      },
+      "oracles": {
+        "octopus": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "FKrHgYAz4V1YeTQe4Y8GiTQ2XACQtkNrqsQNT52JtM7a"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "HiPL676Z6XTgqsbjMbY25YNRzM7ag1uPddqneLuxLFHS"
+          }
+        },
+        "parrot": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "7jm7ecLuGzsiFYQnsxxrYqniGYv3EiABTEq5us31L3Ad"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "9C5ExKWtgVot8dGN5aVw8tDASDFupDdvA9E28Dh99US5"
+          }
+        },
+        "solink": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "p3KAdbbUtHXH48uTV7Jp1W3vvUBoqrQm5kPDv1xsY1T"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "2pafGWojtMy1Hf1mk9zzjCLRTsePSJEEzCuq8Bys5fhi"
+          }
+        },
+        "osprey": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "F4JgC2dy6PxSMMK6vu4akRUwWBTX5aLfKU3nNeThKe7v"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "31KsByHNYuqJt5foAMM522vHaz1z3gHzufw43HaGHVVv"
+          }
+        },
+        "dunlin": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "79UP1zpBrB7QFRBn46asr36mQWq8PhuhYky7wmio5jUb"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "Af3yNckZXttZ4c49EDxPiL1psdLBY4KuKcE8CFxvuU3n"
+          }
+        },
+        "gadwall": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "Hsk3qpcD5isaBg8zY5xVfurZLZ2EtmyLN9yyhykfqy8B"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "54tDMY8BwgKaskPteKJ7X6ZDLRAwA27ACgiE9ahCuyjH"
+          }
+        }
+      },
+      "requesters": {}
     }
   },
   "programID": {

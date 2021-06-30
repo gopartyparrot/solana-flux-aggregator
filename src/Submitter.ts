@@ -6,10 +6,10 @@ import { getAccounts, parseTransactionError, retryOperation } from "./utils"
 import FluxAggregator from "./FluxAggregator"
 import {  Logger } from "winston"
 import { log } from "./log"
-import { IPriceFeed } from "./feeds"
 import axios from "axios"
 import { ErrorNotifier } from "./ErrorNotifier"
-import { metricOracleFeedPrice, metricOracleLastSubmittedPrice, metricOracleSinceLastSubmitSeconds } from "./metrics"
+import { metricOracleFeedPrice, metricOracleLastSubmittedPrice, metricOracleSinceLastSubmitSeconds, metricOracleSubmitRetryCount } from "./metrics"
+import { IPriceFeed } from "./feeds/PriceFeed"
 
 // allow oracle to start a new round after this many slots. each slot is about 500ms
 const MAX_ROUND_STALENESS = 10
@@ -109,7 +109,7 @@ export class Submitter {
       this.oracle = Oracle.deserialize(oracle.data)
       this.answerSubmissions = Submissions.deserialize(answerSubmissions.data)
       this.roundSubmissions = Submissions.deserialize(roundSubmissions.data)
-    } catch(err) {
+    } catch(err) {      
       this.logger.error('Error in ReloadStates', err)
       throw err
     }
@@ -134,7 +134,7 @@ export class Submitter {
   }
 
   private async observePriceFeed() {
-    for await (let price of this.priceFeed) {
+    for await (let price of this.priceFeed) {      
       if (price.decimals != this.aggregator.config.decimals) {
         throw new Error(
           `Expect price with decimals of ${this.aggregator.config.decimals} got: ${price.decimals}`
@@ -167,7 +167,7 @@ export class Submitter {
 
       const valueDiff = this.aggregator.answer.median
         .sub(this.currentValue)
-        .abs()
+        .abs()        
 
       if (valueDiff.lten(this.cfg.minValueChangeForNewRound)) {
         this.logger.debug("price did not change enough to start a new round", {
@@ -200,7 +200,7 @@ export class Submitter {
     if (sinceLastUpdate.ltn(MAX_ROUND_STALENESS)) {
       // round is not stale yet. don't submit new round
       return
-    }
+    }    
 
     // The round is stale. start a new round if possible, or wait for another
     // oracle to start
@@ -266,7 +266,7 @@ export class Submitter {
       this.logger.warn("current value is zero. skip submit")
       return
     }
-
+    
     if (now - this.currentValueUpdatedAt > Submitter.ValueExpireTime) {
       this.logger.warn(
         `current value has expired ${
@@ -277,7 +277,7 @@ export class Submitter {
     }
 
     if (this.isRoundReported(roundID)) {
-      this.logger.debug("don't report to the same round twice")
+      this.logger.warn("don't report to the same round twice")
       return
     }
 
@@ -363,6 +363,9 @@ export class Submitter {
             switch (parseTransactionError(err)) {
               case '6':
               case '3':
+                // do not retry for this errors, do not throw err but reload the states to get new roundID
+                this.reportedRound = this.previousRound
+                this.reloadStates()
                 this.errorNotifier.notifySoft('Submitter', `Each oracle may only submit once per round`, {
                     round: roundID.toString(),
                     aggregator: this.aggregator.config.description,
@@ -371,6 +374,10 @@ export class Submitter {
                   }, err)
                 break
               default:
+                metricOracleSubmitRetryCount.labels(
+                  this.oracle.description, 
+                  this.aggregator.config.description
+                ).inc();
                 throw err
             }
           }

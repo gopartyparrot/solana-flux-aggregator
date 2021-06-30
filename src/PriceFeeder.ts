@@ -1,23 +1,18 @@
-import { Wallet } from 'solray'
-import { AggregatorDeployFile } from './Deployer'
-import BN from 'bn.js'
-import {
-  AggregatedFeed,
-  BitStamp,
-  CoinBase,
-  OKEx,
-  Binance,
-  FilePriceFeed,
-  FTX,
-  PriceFeed
-} from './feeds'
-import { Submitter } from './Submitter'
-import { log } from './log'
-import { conn } from './context'
 import { PublicKey } from '@solana/web3.js'
+import BN from 'bn.js'
+import { Wallet } from 'solray'
 import { SolinkConfig } from './config'
+import { conn } from './context'
+import { AggregatorDeployFile } from './Deployer'
 import { ErrorNotifier } from './ErrorNotifier'
+import {
+  AggregatedFeed, Binance, BinanceInverse, BitStamp,
+  CoinBase, CoinBaseInverse, FileSource,
+  FTX, FTXInverse, OKEx, PriceFeed
+} from './feeds'
+import { log } from './log'
 import { metricOracleBalanceSol } from './metrics'
+import { Submitter } from './Submitter'
 
 // Look at all the available aggregators and submit to those that the wallet can
 // act as an oracle.
@@ -27,17 +22,20 @@ export class PriceFeeder {
 
   constructor(
     private deployInfo: AggregatorDeployFile,
-    private solinkConf: SolinkConfig,
+    private solinkConfig: SolinkConfig,
     private wallet: Wallet
   ) {
     this.submitters = []
     this.feeds = [
       new CoinBase(),
+      new CoinBaseInverse(),
       new BitStamp(),
       new FTX(),
+      new FTXInverse(),
       new OKEx(),
       new Binance(),
-      new FilePriceFeed(5000, this.solinkConf.priceFileDir || process.cwd())
+      new BinanceInverse(),
+      new FileSource(5000, this.solinkConfig.priceFileDir || process.cwd())
     ]
   }
 
@@ -45,8 +43,8 @@ export class PriceFeeder {
     // remove unused feed
     let distinctSources = [
       ...new Set(
-        Object.keys(this.solinkConf.submitter)
-          .map(key => this.solinkConf.submitter[key].source || [])
+        Object.keys(this.solinkConfig.submitter)
+          .map(key => this.solinkConfig.submitter[key].source || [])
           .reduce((a, b) => a.concat(b), [])
       )
     ]
@@ -81,7 +79,7 @@ export class PriceFeeder {
 
     let nFound = 0
 
-    const defaultSubmitterConf = this.solinkConf.submitter.default
+    const defaultSubmitterConf = this.solinkConfig.submitter.default
     const errorNotifier = new ErrorNotifier(this.wallet.pubkey.toString())
 
     for (let [name, aggregatorInfo] of Object.entries(
@@ -100,7 +98,7 @@ export class PriceFeeder {
 
       nFound += 1
 
-      let submitterConf = this.solinkConf.submitter[name]
+      let submitterConf = this.solinkConfig.submitter[name]
       if (
         !submitterConf ||
         !submitterConf.source ||
