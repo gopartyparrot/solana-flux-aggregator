@@ -173,7 +173,7 @@ export class Submitter {
           .sub(this.currentValue)
           .abs()    
 
-        if (valueDiff.lten(this.cfg.minValueChangeForNewRound)) {
+        if (valueDiff.lt(new BN(this.cfg.minValueChangeForNewRound))) {
           this.logger.debug("price did not change enough to start a new round", {
             diff: valueDiff.toNumber(),
           })
