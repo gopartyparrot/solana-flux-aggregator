@@ -168,16 +168,9 @@ export class Submitter {
         Math.floor(lastSubmit / 1000)
       )
 
-      
-
       const valueDiff = this.aggregator.answer.median
         .sub(this.currentValue)
         .abs()    
-
-      console.log('median', this.aggregator.answer.median.toString());
-      console.log('currentValue', this.currentValue.toString());
-      console.log('valueDiff', valueDiff.toString());
-
 
       if (valueDiff.lten(this.cfg.minValueChangeForNewRound)) {
         this.logger.debug("price did not change enough to start a new round", {
