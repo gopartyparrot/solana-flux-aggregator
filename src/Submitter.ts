@@ -188,11 +188,13 @@ export class Submitter {
         await this.trySubmit()
 
       } catch (err) {
+        this.reportedRound = this.previousRound
+        this.reloadStates()
         this.logger.error(`Error in ObservePriceFeed`, { 
-          err, 
+          error: `${err}`, 
           feed: this.aggregator.config.description,
-          median: this.aggregator.answer.median,
-          currentValue: this.currentValue, 
+          median: this.aggregator.answer.median.toString(), 
+          currentValue: this.currentValue.toString(), 
         })
       }
     }
