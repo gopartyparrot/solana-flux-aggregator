@@ -359,7 +359,7 @@
       },
       "config": {
         "description": "usdc:btc",
-        "decimals": 8,
+        "decimals": 2,
         "roundTimeout": 0,
         "minSubmissions": 1,
         "maxSubmissions": 13,

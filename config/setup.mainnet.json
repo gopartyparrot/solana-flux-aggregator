@@ -30,7 +30,7 @@
       ]
     },
     "usdc:btc": {
-      "decimals": 8,
+      "decimals": 2,
       "minSubmissions": 1,
       "maxSubmissions": 13,
       "roundTimeout": 0,

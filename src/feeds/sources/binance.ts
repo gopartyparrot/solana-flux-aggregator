@@ -71,8 +71,8 @@ export class BinanceInverse extends Binance {
   public source = FeedSource.BINANCE_INVERSE
 
   parsePrice(price: number) {
-    // decimals is 8 (satoshi) + 8 (precision)
-    return Math.floor(1 * 1e16 / price)
+    // decimals is 8 (satoshi) + 2 (precision)
+    return Math.floor(1 * 1e10 / price)
   }
 
   async handleSubscribe(pair: string) {

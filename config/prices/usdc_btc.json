@@ -1,0 +1,7 @@
+{
+  "source": "file",
+  "pair": "usdc:btc",
+  "decimals": 2,
+  "inverse": true,
+  "value": 50000
+}

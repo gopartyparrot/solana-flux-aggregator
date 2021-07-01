@@ -149,6 +149,17 @@ cli.command("check-balance").action(async (type) => {
 cli.command('configure-agg <setup-file> <pair>').action(async (setupFile: string, pair: string) => {
   let setupConf = loadAggregatorSetup(setupFile)
   let deploy = loadAggregatorDeploy()
+  // TODO: update DEPLOY_FILE config with new aggregator config
+  // const state = stateFromJSON(
+  //   process.env.DEPLOY_FILE!,
+  //   {
+  //     aggregators: {},
+  //   } as any,
+  //   {
+  //     replacer: jsonReplacer,
+  //     reviver: jsonReviver,
+  //   }
+  // )
   const wallet = await walletFromEnv("ADMIN_MNEMONIC", conn)
   let agg = new FluxAggregator(wallet, deploy.programID)
 
