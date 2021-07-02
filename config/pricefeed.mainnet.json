@@ -8,7 +8,7 @@
     },
     "usdc:btc": {
       "source": ["coinbase_inverse"],
-      "minValueChangeForNewRound": 500
+      "minValueChangeForNewRound": 20
     },
     "default": {
       "source": [],
