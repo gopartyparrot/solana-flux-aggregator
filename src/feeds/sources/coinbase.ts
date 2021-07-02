@@ -96,7 +96,7 @@ export class CoinBaseInverse extends PriceFeed {
     const price: IPrice = {
       source: this.source,
       pair,
-      decimals: 2,
+      decimals: 10,
       value: Math.floor(1 * 1e10 / payload.price), // decimals is 8 (satoshi) + 2 (precision)
       time: Date.now()
     }    
