@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  flux-standalone:
+    build: 
+      context: .
+    restart: always
+    command: yarn solink oracle
+    volumes:
+      - ./logs:/app/logs
+      - ./config:/app/config
+    env_file:
+      - .env
