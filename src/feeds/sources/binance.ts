@@ -4,6 +4,7 @@ import { IPrice, PriceFeed } from '../PriceFeed'
 
 export class Binance extends PriceFeed {
   public source = FeedSource.BINANCE
+  public decimals = 2;
   protected log = log.child({ class: this.source })
   protected baseurl = 'wss://stream.binance.com/ws'
 
@@ -28,17 +29,19 @@ export class Binance extends PriceFeed {
       return
     }
     // "btcbusd" => "btc:usd"
-    // assume that the base symbol for the pair is 3 letters
+    // TODO: assume that the base symbol for the pair is 3 letters
     const baseCurrency = payload.s.slice(0, 3).toLowerCase()
     const quoteCurrency = payload.s.slice(3).toLowerCase()
-    const pair = `${baseCurrency}:${
-      quoteCurrency == 'busd' ? 'usd' : quoteCurrency
-    }`
+    let pair = `${baseCurrency}:${quoteCurrency}`
+
+    if (this.source === FeedSource.BINANCE_INVERSE) {
+      pair = pair.split(':').reverse().join(':')
+    }
 
     const price: IPrice = {
       source: this.source,
       pair,
-      decimals: 2,
+      decimals: this.decimals,
       value: this.parsePrice(payload.p),
       time: Date.now()
     }
@@ -53,9 +56,7 @@ export class Binance extends PriceFeed {
   async handleSubscribe(pair: string) {
     // "btc:usd" => "btcbusd"
     const [baseCurrency, quoteCurrency] = pair.split(':')
-    const targetPair = `${baseCurrency}${
-      quoteCurrency.toLowerCase() === 'usd' ? 'busd' : quoteCurrency
-    }@trade`.toLowerCase()
+    const targetPair = `${baseCurrency}${quoteCurrency}@trade`.toLowerCase()
     this.conn.send(
       JSON.stringify({
         method: 'SUBSCRIBE',
@@ -69,10 +70,10 @@ export class Binance extends PriceFeed {
 
 export class BinanceInverse extends Binance {
   public source = FeedSource.BINANCE_INVERSE
+  public decimals = 10;
 
   parsePrice(price: number) {
-    // decimals is 8 (satoshi) + 2 (precision)
-    return Math.floor(1 * 1e10 / price)
+    return Math.floor(1 * 10 ** this.decimals / price)
   }
 
   async handleSubscribe(pair: string) {
