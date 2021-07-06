@@ -4,6 +4,7 @@ import { IPrice, PriceFeed } from '../PriceFeed'
 
 export class FTX extends PriceFeed {
   public source = FeedSource.FTX
+  public decimals = 2;
   protected log = log.child({ class: this.source })
   protected baseurl = 'wss://ftx.com/ws/'
 
@@ -46,13 +47,17 @@ export class FTX extends PriceFeed {
       return
     }
 
-    const pair = (payload.market as string).replace('/', ':').toLowerCase()
+    let pair = (payload.market as string).replace('/', ':').toLowerCase()
     const lastTrade = payload.data.pop()
+
+    if (this.source === FeedSource.FTX_INVERSE) {
+      pair = pair.split(':').reverse().join(':')
+    }
 
     const price: IPrice = {
       source: this.source,
       pair,
-      decimals: 2,
+      decimals: this.decimals,
       value: this.parsePrice(lastTrade.price),
       time: Date.now()
     }
@@ -80,10 +85,10 @@ export class FTX extends PriceFeed {
 
 export class FTXInverse extends FTX {
   public source = FeedSource.FTX_INVERSE
+  public decimals = 10
 
   parsePrice(price: number) {    
-    // decimals is 8 (satoshi) + 8 (precision)
-    return Math.floor(1 * 1e16 / price)
+    return Math.floor(1 * 10 ** this.decimals / price)
   }
 
   async handleSubscribe(pair: string) {
