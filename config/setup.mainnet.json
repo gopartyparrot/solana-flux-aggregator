@@ -26,7 +26,8 @@
       "rewardTokenAccount": "3oLHHTaRqNsuTMjsTtkVy8bock6Bx8gCmDxku4TurVj1",
       "oracles": [
         "mallard",
-        "goldfinch"
+        "goldfinch",
+        "tester"
       ]
     },
     "usdc:btc": {
@@ -54,6 +55,9 @@
     },
     "siskin": {
       "owner": "Gtsu94Vbwm2hNyR5k3U4djkD69pX52HsY63q2forFDDp"
+    },
+    "tester": {
+      "owner": "65JA9RMG1eWpUqAAxa9xCK2GgUVqPWW6BHV7haUwYSMv"
     }
   }
 }
