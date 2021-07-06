@@ -144,54 +144,59 @@ export class Submitter {
         )
       }
 
-      // TODO: save price as currentValue, in submitCurrentValue check price.time
-      // Do not submit price older then 5 minutes
-      this.currentValue = new BN(price.value)
-      this.currentValueUpdatedAt = price.time
+      try {
+        // TODO: save price as currentValue, in submitCurrentValue check price.time
+        // Do not submit price older then 5 minutes
+        this.currentValue = new BN(price.value)
+        this.currentValueUpdatedAt = price.time
 
-      metricOracleFeedPrice.set(
-        {
-          submitter: this.oracle.description,
-          feed: price.pair,
-          source: price.source
-        },
-        price.value / 10 ** price.decimals
-      )
+        metricOracleFeedPrice.set(
+          {
+            submitter: this.oracle.description,
+            feed: price.pair,
+            source: price.source
+          },
+          price.value / 10 ** price.decimals
+        )
 
-      const now = Date.now()
-      const lastSubmit = now - this.lastSubmittedAt
-      metricOracleSinceLastSubmitSeconds.set(
-        {
-          submitter: this.oracle.description,
-          feed: this.aggregator.config.description
-        },
-        Math.floor(lastSubmit / 1000)
-      )
+        const now = Date.now()
+        const lastSubmit = now - this.lastSubmittedAt
+        metricOracleSinceLastSubmitSeconds.set(
+          {
+            submitter: this.oracle.description,
+            feed: this.aggregator.config.description
+          },
+          Math.floor(lastSubmit / 1000)
+        )
 
-      
+        const valueDiff = this.aggregator.answer.median
+          .sub(this.currentValue)
+          .abs()    
 
-      const valueDiff = this.aggregator.answer.median
-        .sub(this.currentValue)
-        .abs()    
+        if (valueDiff.lt(new BN(this.cfg.minValueChangeForNewRound))) {
+          this.logger.debug("price did not change enough to start a new round", {
+            diff: valueDiff.toNumber(),
+          })
+          continue
+        }
 
-      console.log('median', this.aggregator.answer.median.toString());
-      console.log('currentValue', this.currentValue.toString());
-      console.log('valueDiff', valueDiff.toString());
+        if (!this.isRoundReported(this.aggregator.round.id)) {
+          // should reload the state if no round is reported
+          await this.reloadStates()
+        }
 
+        await this.trySubmit()
 
-      if (valueDiff.lten(this.cfg.minValueChangeForNewRound)) {
-        this.logger.debug("price did not change enough to start a new round", {
-          diff: valueDiff.toNumber(),
+      } catch (err) {
+        this.reportedRound = this.previousRound
+        this.reloadStates()
+        this.logger.error(`Error in ObservePriceFeed`, { 
+          error: `${err}`, 
+          feed: this.aggregator.config.description,
+          median: this.aggregator.answer.median.toString(), 
+          currentValue: this.currentValue.toString(), 
         })
-        continue
       }
-
-      if (!this.isRoundReported(this.aggregator.round.id)) {
-        // should reload the state if no round is reported
-        await this.reloadStates()
-      }
-
-      await this.trySubmit()
     }
   }
 

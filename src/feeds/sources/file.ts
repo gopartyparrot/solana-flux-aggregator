@@ -27,6 +27,9 @@ export class FileSource extends PriceFeed {
           try {
             fs.accessSync(filename, fs.constants.R_OK)
             let price = JSON.parse(fs.readFileSync(filename, 'utf8')); //TODO validate
+            if(price.inverse) {
+              price.value =  Math.floor(1 * 1e10 / price.value);
+            }
             price.time = Date.now();
             this.onMessage(price);
           } catch (e) {
