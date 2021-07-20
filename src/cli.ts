@@ -196,14 +196,15 @@ cli.command('transfer-owner <pair> <new-owner').action(async (pair: string, newO
   if(!aggregatorAccount) {
     throw new Error('aggregatorAccount not found')
   }
-  const aggregator = Aggregator.deserialize<Aggregator>(aggregatorAccount?.data)
+  const aggregator = Aggregator.deserialize<Aggregator>(aggregatorAccount.data)
   const wallet = await walletFromEnv("ADMIN_MNEMONIC", conn)
 
   log.info(`
     prog_id: ${deploy.programID}, 
     aggregator: ${aggregatorPk}, 
     current owner: ${aggregator.owner},
-    new owner: ${newOwner}`)
+    new owner: ${newOwner}
+  `)
 
   const agg = new FluxAggregator(wallet, deploy.programID)
   await agg.transferOwner({
@@ -213,6 +214,17 @@ cli.command('transfer-owner <pair> <new-owner').action(async (pair: string, newO
   })
 
   log.info(`aggregator owner changed`)
+
+  const newAggregatorAccount = await conn.getAccountInfo(aggregatorPk)
+  if(!newAggregatorAccount) {
+    throw new Error('newAggregatorAccount not found')
+  }
+  const newAggregator = Aggregator.deserialize<Aggregator>(newAggregatorAccount.data)
+
+  log.info(`
+    new aggregator round: ${newAggregator.round}, 
+    new aggregator owner: ${newAggregator.owner}
+  `)
 })
 
 cli.parse(process.argv)
