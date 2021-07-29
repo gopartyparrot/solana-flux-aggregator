@@ -4,6 +4,7 @@ export { BitStamp } from './sources/bitstamp'
 export { CoinBase, CoinBaseInverse } from './sources/coinbase'
 export { FTX, FTXInverse } from './sources/ftx'
 export { OKEx } from './sources/okex'
+export { LpToken } from './sources/lptoken'
 export { FileSource } from './sources/file'
 export { PriceFeed } from './PriceFeed'
 

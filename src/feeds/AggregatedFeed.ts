@@ -1,6 +1,6 @@
 import EventEmitter from 'events'
 import { Logger } from 'winston'
-import { FeedSource } from '../config'
+import { FeedSource, SolinkSubmitterConfig } from '../config'
 import { ErrorNotifier } from '../ErrorNotifier'
 import { log } from '../log'
 import { metricOracleFeedPrice } from '../metrics'
@@ -19,7 +19,8 @@ export class AggregatedFeed {
     public feeds: PriceFeed[],
     public pair: string,
     private oracle: string,
-    private errorNotifier?: ErrorNotifier
+    private errorNotifier?: ErrorNotifier,
+    private submitterConf?: SolinkSubmitterConfig
   ) {
     this.logger = log.child({
       oracle: oracle,
@@ -35,7 +36,7 @@ export class AggregatedFeed {
 
     let i = 0
     for (let feed of this.feeds) {
-      feed.subscribe(pair)
+      feed.subscribe(pair, this.submitterConf)
       this.lastUpdate.set(`${feed.source}-${pair}`, {
         feed,
         updatedAt: Date.now()

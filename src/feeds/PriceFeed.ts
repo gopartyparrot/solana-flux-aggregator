@@ -2,7 +2,7 @@ import EventEmitter from 'events'
 import ReconnectingWebSocket from 'reconnecting-websocket'
 import winston from 'winston'
 import WebSocket from 'ws'
-import { FeedSource } from '../config'
+import { FeedSource, SolinkSubmitterConfig } from '../config'
 
 export const UPDATE = 'UPDATE'
 
@@ -77,7 +77,7 @@ export abstract class PriceFeed {
     return this.connected
   }
 
-  subscribe(pair: string) {
+  subscribe(pair: string, submitterConf?: SolinkSubmitterConfig) {
     if (this.pairs.includes(pair)) {
       // already subscribed
       return
