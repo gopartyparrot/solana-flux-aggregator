@@ -8,7 +8,7 @@ import { ErrorNotifier } from './ErrorNotifier'
 import {
   AggregatedFeed, Binance, BinanceInverse, BitStamp,
   CoinBase, CoinBaseInverse, FileSource,
-  FTX, FTXInverse, OKEx, PriceFeed
+  FTX, FTXInverse, LpToken, OKEx, PriceFeed
 } from './feeds'
 import { log } from './log'
 import { metricOracleBalanceSol } from './metrics'
@@ -32,6 +32,7 @@ export class PriceFeeder {
       new BitStamp(),
       new FTX(),
       new FTXInverse(),
+      new LpToken(),
       new OKEx(),
       new Binance(),
       new BinanceInverse(),
@@ -115,7 +116,7 @@ export class PriceFeeder {
       }
       log.info(`feeds for ${name}: ${pairFeeds.map(f => f.source).join(',')}`)
       const oracleName  = this.getOracleName();
-      const feed = new AggregatedFeed(pairFeeds, name, oracleName, errorNotifier)
+      const feed = new AggregatedFeed(pairFeeds, name, oracleName, errorNotifier, submitterConf)
       const priceFeed = feed.medians()
       const chainlinkMode = !!process.env.CHAINLINK_NODE_URL
 

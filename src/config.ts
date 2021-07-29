@@ -75,9 +75,22 @@ export interface SolinkConfig {
   }
 }
 
-interface SolinkSubmitterConfig {
+interface SolinkLpTokenHolderConfig {
+  address: string
+  oracle: string
+  decimals: number
+}
+
+interface SolinkLpTokenSubmitterConfig {
+  lpTokenAddress: string
+  holders: SolinkLpTokenHolderConfig[]
+  decimals: number
+}
+
+export interface SolinkSubmitterConfig {
   source?: FeedSource[]
   inverse?: boolean
+  lpToken?: SolinkLpTokenSubmitterConfig,
   minValueChangeForNewRound: number
 }
 
@@ -90,5 +103,6 @@ export enum FeedSource {
   BINANCE = "binance",
   BINANCE_INVERSE = "binance_inverse",
   OKEX = "okex",
+  LPTOKEN = "lptoken",
   FILE = "file",
 }
