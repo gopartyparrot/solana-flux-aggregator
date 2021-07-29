@@ -1,8 +1,10 @@
 import BigNumber from 'bignumber.js'
-
+import throttle from 'lodash.throttle'
 import { SolinkSubmitterConfig } from '../../../config'
 import { IPrice } from '../../PriceFeed'
 import { LpToken, ACCOUNT_CHANGED, AccounChanged } from './lptoken'
+
+const DELAY_TIME = 1000
 
 export class LpTokenPair {
   private addresses: string[] = []
@@ -23,14 +25,18 @@ export class LpTokenPair {
       this.addresses.push(holder.address)
       this.addresses.push(holder.oracle)
     })
+    const generatePriceThrottle = throttle(this.generatePrice, DELAY_TIME, {
+      trailing: true,
+      leading: false
+    })
     this.lpToken.emitter.on(ACCOUNT_CHANGED, (changed: AccounChanged) => {
       if (this.addresses.includes(changed.address)) {
-        this.generatePrice()
+        generatePriceThrottle()
       }
     })
   }
 
-  generatePrice() {
+  generatePrice = () => {
     if (!this.config.lpToken) {
       return
     }
