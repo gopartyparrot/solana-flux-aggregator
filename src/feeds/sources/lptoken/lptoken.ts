@@ -1,12 +1,13 @@
 import { PublicKey, AccountInfo } from '@solana/web3.js'
-import {
-  AccountInfo as TokenAccount,
-  MintInfo,
-  AccountLayout as TokenAccountLayout,
-  MintLayout,
-  u64
-} from '@solana/spl-token'
+// import {
+//   AccountInfo as TokenAccount,
+//   MintInfo,
+//   AccountLayout as TokenAccountLayout,
+//   MintLayout
+// } from '@solana/spl-token'
 import assert from 'assert'
+import * as BufferLayout from 'buffer-layout'
+import BN from 'bn.js'
 
 import { FeedSource, SolinkSubmitterConfig } from '../../../config'
 import { log } from '../../../log'
@@ -22,6 +23,28 @@ interface oraclePrice {
   price: number
   decimals: number
 }
+
+export type TokenAccount = {
+  amount: BN
+}
+
+export type MintInfo = {
+  supply: BN
+  decimals: number
+}
+
+const TOKEN_ACCOUNT_LAYOUT = BufferLayout.struct([
+  BufferLayout.blob(64),
+  BufferLayout.nu64('amount'),
+  BufferLayout.blob(93)
+])
+
+const MINT_LAYOUT = BufferLayout.struct([
+  BufferLayout.blob(36),
+  BufferLayout.nu64('supply'),
+  BufferLayout.u8('decimals'),
+  BufferLayout.blob(37)
+])
 
 export interface AccounChanged {
   address: string
@@ -192,6 +215,7 @@ export class LpToken extends PriceFeed {
 
     const pairHandler = new LpTokenPair(pair, this, submitterConf)
     pairHandler.init()
+    pairHandler.generatePrice() // TODO debug
   }
 
   //unused for lptoken price feed
@@ -212,16 +236,16 @@ function extractAggregator(data: Buffer): oraclePrice {
   }
 }
 
-function decodeAccountTokenInfo(data: Buffer) {
-  const accountInfo = TokenAccountLayout.decode(data)
-  accountInfo.mint = new PublicKey(accountInfo.mint)
-  accountInfo.owner = new PublicKey(accountInfo.owner)
-  accountInfo.amount = u64.fromBuffer(accountInfo.amount)
+function decodeAccountTokenInfo(data: Buffer): TokenAccount {
+  const accountInfo = TOKEN_ACCOUNT_LAYOUT.decode(data)
+  accountInfo.amount = new BN(accountInfo.amount)
   return accountInfo
 }
 
-function decodeMintInfo(data: Buffer) {
-  const info = MintLayout.decode(data)
-  info.supply = u64.fromBuffer(info.supply)
+function decodeMintInfo(data: Buffer): MintInfo {
+  const info = MINT_LAYOUT.decode(data)
+  info.supply = new BN(info.supply)
+  info.decimals = info.decimals
+
   return info
 }
