@@ -21,7 +21,7 @@ export interface IPriceFeed {
 export abstract class PriceFeed {
   public emitter = new EventEmitter()
 
-  public conn!: ReconnectingWebSocket
+  protected conn!: ReconnectingWebSocket
   protected connected!: Promise<void>
 
   protected abstract get log(): winston.Logger
@@ -75,6 +75,14 @@ export abstract class PriceFeed {
     })
 
     return this.connected
+  }
+
+  checkConnection() {
+    return this.conn && this.conn.readyState === this.conn.OPEN
+  }
+
+  reconnect() {
+    this.conn.reconnect();
   }
 
   subscribe(pair: string, submitterConf?: SolinkSubmitterConfig) {
