@@ -148,15 +148,10 @@ export class AggregatedFeed {
       return
     }
 
-    const now = Date.now()
-    const acceptedTime = now - 2 * 60 * 1000 // 5 minutes ago
-
-
+    const updateTime = Math.max(...prices.map(price => price.time));
     const values = prices
       // accept only prices > 0 that have been updated within 5 minutes
-      .filter(price => price.value > 0 && price.time >= acceptedTime)
-      // Temporary ignore FTX prices from median
-      .filter(price => price.source !== FeedSource.FTX)
+      .filter(price => price.value > 0)
       .map(price => price.value)
 
     return {
@@ -164,7 +159,7 @@ export class AggregatedFeed {
       pair: prices[0].pair,
       decimals: prices[0].decimals,
       value: median(values),
-      time: now
+      time: updateTime
     }
   }
 }
