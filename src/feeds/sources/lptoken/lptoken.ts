@@ -1,13 +1,5 @@
 import { PublicKey, AccountInfo } from '@solana/web3.js'
-// import {
-//   AccountInfo as TokenAccount,
-//   MintInfo,
-//   AccountLayout as TokenAccountLayout,
-//   MintLayout
-// } from '@solana/spl-token'
 import assert from 'assert'
-import * as BufferLayout from 'buffer-layout'
-import BN from 'bn.js'
 
 import { FeedSource, SolinkSubmitterConfig } from '../../../config'
 import { log } from '../../../log'
@@ -15,6 +7,7 @@ import { conn as web3Conn } from '../../../context'
 import { IPrice, PriceFeed } from '../../PriceFeed'
 import { Aggregator } from '../../../schema'
 import { LpTokenPair } from './lpTokenPair'
+import { BNu64, MINT_LAYOUT, TOKEN_ACCOUNT_LAYOUT } from './layout'
 
 export const ACCOUNT_CHANGED = 'ACCOUNT_CHANGED'
 const STABLE_ORACLE = 'STABLEQRACLE1111111111111111111111111111111'
@@ -25,34 +18,20 @@ interface oraclePrice {
 }
 
 export type TokenAccount = {
-  amount: BN
+  amount: BNu64
 }
 
 export type MintInfo = {
-  supply: BN
+  supply: BNu64
   decimals: number
 }
-
-const TOKEN_ACCOUNT_LAYOUT = BufferLayout.struct([
-  BufferLayout.blob(64),
-  BufferLayout.nu64('amount'),
-  BufferLayout.blob(93)
-])
-
-const MINT_LAYOUT = BufferLayout.struct([
-  BufferLayout.blob(36),
-  BufferLayout.nu64('supply'),
-  BufferLayout.u8('decimals'),
-  BufferLayout.blob(37)
-])
-
 export interface AccounChanged {
   address: string
 }
 
 export class LpToken extends PriceFeed {
   public source = FeedSource.LPTOKEN
-  public decimals = 2
+  public decimals = 4
   public log = log.child({ class: this.source })
 
   protected baseurl = 'unused'
@@ -138,7 +117,7 @@ export class LpToken extends PriceFeed {
         throw Promise.reject(`null lp token account ${lpTokenAddress}`)
       }
 
-      const lpTokenMintInfo: MintInfo = decodeMintInfo(lpTokenAccountInfo.data)
+      const lpTokenMintInfo = decodeMintInfo(lpTokenAccountInfo.data)
 
       this.log.debug(
         `${pair}: lp token ${lpTokenAddress} supply ${lpTokenMintInfo.supply.toString()}`
@@ -238,13 +217,13 @@ function extractAggregator(data: Buffer): oraclePrice {
 
 function decodeAccountTokenInfo(data: Buffer): TokenAccount {
   const accountInfo = TOKEN_ACCOUNT_LAYOUT.decode(data)
-  accountInfo.amount = new BN(accountInfo.amount)
+  accountInfo.amount = BNu64.fromBuffer(accountInfo.amount)
   return accountInfo
 }
 
 function decodeMintInfo(data: Buffer): MintInfo {
   const info = MINT_LAYOUT.decode(data)
-  info.supply = new BN(info.supply)
+  info.supply = BNu64.fromBuffer(info.supply)
   info.decimals = info.decimals
 
   return info
