@@ -74,9 +74,10 @@ export class LpToken extends PriceFeed {
       this.emitter.emit(ACCOUNT_CHANGED, {
         address
       } as AccounChanged)
-      this.log.debug(
-        `subscribed lptoken ${address} supply ${info.supply.toString()}`
-      )
+      this.log.debug('subscription update lptoken', {
+        address,
+        supply: info.supply.toString()
+      })
     }
   }
 
@@ -87,9 +88,10 @@ export class LpToken extends PriceFeed {
       this.emitter.emit(ACCOUNT_CHANGED, {
         address
       } as AccounChanged)
-      this.log.debug(
-        `subscribed holder ${address} amount ${info.amount.toString()}`
-      )
+      this.log.debug('subscription update holder balance', {
+        address,
+        amount: info.amount.toString()
+      })
     }
   }
 
@@ -100,7 +102,10 @@ export class LpToken extends PriceFeed {
       this.emitter.emit(ACCOUNT_CHANGED, {
         address
       } as AccounChanged)
-      this.log.debug(`subscribed oracle ${address} price ${info.price}`)
+      this.log.debug('subscription update oracle', {
+        address,
+        price: info.price
+      })
     }
   }
 
@@ -119,9 +124,11 @@ export class LpToken extends PriceFeed {
 
       const lpTokenMintInfo = decodeMintInfo(lpTokenAccountInfo.data)
 
-      this.log.debug(
-        `${pair}: lp token ${lpTokenAddress} supply ${lpTokenMintInfo.supply.toString()}`
-      )
+      this.log.debug('lp token fetched', {
+        pair,
+        lpTokenAddress,
+        supply: lpTokenMintInfo.supply.toString()
+      })
 
       this.lpTokenAccounts.set(lpTokenAddress, lpTokenMintInfo)
 
@@ -145,11 +152,11 @@ export class LpToken extends PriceFeed {
           const holderTokenInfo = decodeAccountTokenInfo(holderAccountInfo.data)
           this.holderAccounts.set(holder.address, holderTokenInfo)
 
-          this.log.debug(
-            `${pair}: holder ${
-              holder.address
-            } amount ${holderTokenInfo.amount.toString()}`
-          )
+          this.log.debug('holder fetched', {
+            pair,
+            address: holder.address,
+            amount: holderTokenInfo.amount.toString()
+          })
 
           // subscribe token to watch balance
           web3Conn.onAccountChange(
@@ -177,9 +184,11 @@ export class LpToken extends PriceFeed {
             const aggregatorInfo = extractAggregator(aggregatorAccountInfo.data)
 
             this.oracles.set(holder.oracle, aggregatorInfo)
-            this.log.debug(
-              `${pair}: oracle ${holder.oracle} price ${aggregatorInfo.price}`
-            )
+            this.log.debug('oracle fetched', {
+              pair,
+              address: holder.oracle,
+              price: aggregatorInfo.price
+            })
 
             web3Conn.onAccountChange(
               oraclePubkey,
@@ -194,7 +203,6 @@ export class LpToken extends PriceFeed {
 
     const pairHandler = new LpTokenPair(pair, this, submitterConf)
     pairHandler.init()
-    pairHandler.generatePrice() // TODO debug
   }
 
   //unused for lptoken price feed
