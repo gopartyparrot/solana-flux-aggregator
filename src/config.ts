@@ -78,12 +78,13 @@ export interface SolinkConfig {
 interface SolinkLpTokenHolderConfig {
   address: string
   oracle: string
-  decimal: number
+  decimals: number
 }
 
 interface SolinkLpTokenSubmitterConfig {
   lpTokenAddress: string
   holders: SolinkLpTokenHolderConfig[]
+  decimals: number
 }
 
 export interface SolinkSubmitterConfig {

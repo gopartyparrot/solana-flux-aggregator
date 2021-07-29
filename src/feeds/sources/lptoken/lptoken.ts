@@ -31,7 +31,7 @@ export interface AccounChanged {
 
 export class LpToken extends PriceFeed {
   public source = FeedSource.LPTOKEN
-  public decimals = 4
+  public decimals = 2
   public log = log.child({ class: this.source })
 
   protected baseurl = 'unused'

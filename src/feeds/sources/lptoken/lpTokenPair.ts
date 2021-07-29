@@ -58,7 +58,7 @@ export class LpTokenPair {
         const curValue = new BigNumber(tokenAccount.amount.toString())
           .times(new BigNumber(oracle.price))
           .multipliedBy(
-            new BigNumber(10).pow(-holder.decimal - oracle.decimals)
+            new BigNumber(10).pow(-holder.decimals - oracle.decimals)
           )
 
         return total.plus(curValue)
@@ -73,14 +73,14 @@ export class LpTokenPair {
     )
 
     const value = lpTokenPrice
-      .times(new BigNumber(10).pow(this.lpToken.decimals))
+      .times(new BigNumber(10).pow(this.config.lpToken.decimals))
       .integerValue()
       .toNumber()
 
     const price: IPrice = {
       source: this.lpToken.source,
       pair: this.pair,
-      decimals: this.lpToken.decimals,
+      decimals: this.config.lpToken.decimals,
       value,
       time: Date.now()
     }
