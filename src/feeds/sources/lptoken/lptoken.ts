@@ -205,6 +205,14 @@ export class LpToken extends PriceFeed {
     pairHandler.init()
   }
 
+  // web3.connect handle reconnection by itself
+  checkConnection() {
+    return true
+  }
+
+  // web3.connect handle reconnection by itself
+  reconnect() {}
+
   //unused for lptoken price feed
   parseMessage(data: any): IPrice | undefined {
     return undefined

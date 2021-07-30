@@ -86,7 +86,7 @@ export class AggregatedFeed {
     setInterval(() => {
       // Check feeds websocket connection
       for (const feed of this.feeds) {
-        if (feed.conn.readyState !== feed.conn.OPEN) {
+        if (!feed.checkConnection()) {
           const meta = {
             feed: this.pair,
             source: feed.source,
@@ -98,7 +98,7 @@ export class AggregatedFeed {
             `Websocket is not connected, try to reconnect`,
             meta
           )
-          feed.conn.reconnect()
+          feed.reconnect()
         }
       }
 
@@ -121,7 +121,7 @@ export class AggregatedFeed {
             `No price data from websocket, try to reconnect`,
             meta
           )
-          feedInfo.feed.conn.reconnect()
+          feedInfo.feed.reconnect()
         }
       }
     }, this.lastUpdateTimeout / 2)

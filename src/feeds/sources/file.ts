@@ -42,6 +42,10 @@ export class FileSource extends PriceFeed {
       }
     }
   
+    // the connection of file price is good always
+    checkConnection() { return true }
+    // file price feed doesn't need to reconnect
+    reconnect() {}
     //unused for file price feed
     parseMessage(data: any): IPrice | undefined { return undefined; }
     //unused for file price feed
