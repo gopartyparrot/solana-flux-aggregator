@@ -3,6 +3,7 @@ import ReconnectingWebSocket from 'reconnecting-websocket'
 import winston from 'winston'
 import WebSocket from 'ws'
 import { FeedSource, SolinkSubmitterConfig } from '../config'
+import { AggregatedFeed } from './AggregatedFeed'
 
 export const UPDATE = 'UPDATE'
 
@@ -16,6 +17,10 @@ export interface IPrice {
 
 export interface IPriceFeed {
   [Symbol.asyncIterator]: () => AsyncIterator<IPrice>
+}
+
+export interface SubAggregatedFeeds {
+  [key: string]: AggregatedFeed
 }
 
 export abstract class PriceFeed {
@@ -62,7 +67,7 @@ export abstract class PriceFeed {
       })
 
       conn.addEventListener('message', msg => {
-        this.log.debug('raw price update', { msg })
+        // this.log.debug('raw price update', { msg })
         try {
           const price = this.parseMessage(msg.data)
           if (price) {
@@ -85,7 +90,7 @@ export abstract class PriceFeed {
     this.conn.reconnect();
   }
 
-  subscribe(pair: string, submitterConf?: SolinkSubmitterConfig) {
+  subscribe(pair: string, submitterConf?: SolinkSubmitterConfig, subAggregatedFeeds?: SubAggregatedFeeds) {
     if (this.pairs.includes(pair)) {
       // already subscribed
       return

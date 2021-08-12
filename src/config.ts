@@ -77,7 +77,13 @@ export interface SolinkConfig {
 
 interface SolinkLpTokenHolderConfig {
   address: string
-  oracle: string
+  // oracle: string
+  feed: {
+    name: string
+    config: {
+      source: FeedSource[]
+    }
+  }
   decimals: number
 }
 
@@ -89,6 +95,7 @@ interface SolinkLpTokenSubmitterConfig {
 
 export interface SolinkSubmitterConfig {
   source?: FeedSource[]
+  additionalSources?: FeedSource[]
   inverse?: boolean
   lpToken?: SolinkLpTokenSubmitterConfig,
   minValueChangeForNewRound: number

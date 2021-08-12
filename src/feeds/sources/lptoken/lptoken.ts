@@ -4,15 +4,15 @@ import assert from 'assert'
 import { FeedSource, SolinkSubmitterConfig } from '../../../config'
 import { log } from '../../../log'
 import { conn as web3Conn } from '../../../context'
-import { IPrice, PriceFeed } from '../../PriceFeed'
+import { IPrice, PriceFeed, SubAggregatedFeeds } from '../../PriceFeed'
 import { Aggregator } from '../../../schema'
 import { LpTokenPair } from './lpTokenPair'
 import { BNu64, MINT_LAYOUT, TOKEN_ACCOUNT_LAYOUT } from './layout'
 
 export const ACCOUNT_CHANGED = 'ACCOUNT_CHANGED'
-const STABLE_ORACLE = 'STABLEQRACLE1111111111111111111111111111111'
+const STABLE_ORACLE = 'STABLE'
 
-interface oraclePrice {
+export interface oraclePrice {
   price: number
   decimals: number
 }
@@ -37,7 +37,6 @@ export class LpToken extends PriceFeed {
   protected baseurl = 'unused'
   private lpTokenAccounts = new Map<string, MintInfo>()
   private holderAccounts = new Map<string, TokenAccount>()
-  private oracles = new Map<string, oraclePrice>()
   private subscribeAccountAddresses: string[] = []
 
   public getLpTokenAccount(address: string) {
@@ -48,15 +47,11 @@ export class LpToken extends PriceFeed {
     return this.holderAccounts.get(address)
   }
 
-  public getOracle(address: string) {
-    return this.oracles.get(address)
-  }
-
   async init() {
     this.log.debug('init', { baseurl: this.baseurl })
   }
 
-  subscribe(pair: string, submitterConf?: SolinkSubmitterConfig) {
+  subscribe(pair: string, submitterConf?: SolinkSubmitterConfig, subAggregatedFeeds?: SubAggregatedFeeds) {
     if (this.pairs.includes(pair)) {
       // already subscribed
       return
@@ -64,7 +59,7 @@ export class LpToken extends PriceFeed {
 
     this.pairs.push(pair)
 
-    this.doSubscribe(pair, submitterConf)
+    this.doSubscribe(pair, submitterConf, subAggregatedFeeds)
   }
 
   createLpTokenChangedHandler(address: string) {
@@ -95,23 +90,11 @@ export class LpToken extends PriceFeed {
     }
   }
 
-  createOracleChangedHanlder(address: string) {
-    return (accountInfo: AccountInfo<Buffer>) => {
-      const info = extractAggregator(accountInfo.data)
-      this.oracles.set(address, info)
-      this.emitter.emit(ACCOUNT_CHANGED, {
-        address
-      } as AccounChanged)
-      this.log.debug('subscription update oracle', {
-        address,
-        price: info.price
-      })
-    }
-  }
-
-  async doSubscribe(pair: string, submitterConf?: SolinkSubmitterConfig) {
+  async doSubscribe(pair: string, submitterConf?: SolinkSubmitterConfig, subAggregatedFeeds?: SubAggregatedFeeds) {
     assert.ok(submitterConf, `Config error with ${this.source}`)
     assert.ok(submitterConf.lpToken, `Config error with ${this.source}`)
+    assert.ok(subAggregatedFeeds, `Config error with ${this.source}`)
+
     this.log.debug('subscribe pair', { pair, submitterConf })
 
     const lpTokenAddress = submitterConf.lpToken.lpTokenAddress
@@ -165,43 +148,10 @@ export class LpToken extends PriceFeed {
           )
           this.subscribeAccountAddresses.push(holder.address)
         }
-
-        // fetch and subscribe price oracle
-        if (!this.subscribeAccountAddresses.includes(holder.oracle)) {
-          if (holder.oracle === STABLE_ORACLE) {
-            this.oracles.set(holder.oracle, {
-              price: 1,
-              decimals: 0
-            })
-          } else {
-            const oraclePubkey = new PublicKey(holder.oracle)
-            const aggregatorAccountInfo = await web3Conn.getAccountInfo(
-              oraclePubkey
-            )
-            if (!aggregatorAccountInfo) {
-              throw Promise.reject(`null oracle account ${holder.oracle}`)
-            }
-            const aggregatorInfo = extractAggregator(aggregatorAccountInfo.data)
-
-            this.oracles.set(holder.oracle, aggregatorInfo)
-            this.log.debug('oracle fetched', {
-              pair,
-              address: holder.oracle,
-              price: aggregatorInfo.price
-            })
-
-            web3Conn.onAccountChange(
-              oraclePubkey,
-              this.createTokenHolderChangedHandler(holder.oracle)
-            )
-          }
-
-          this.subscribeAccountAddresses.push(holder.oracle)
-        }
       })
     )
 
-    const pairHandler = new LpTokenPair(pair, this, submitterConf)
+    const pairHandler = new LpTokenPair(pair, this, submitterConf, subAggregatedFeeds)
     pairHandler.init()
   }
 

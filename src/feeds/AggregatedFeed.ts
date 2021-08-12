@@ -5,7 +5,7 @@ import { ErrorNotifier } from '../ErrorNotifier'
 import { log } from '../log'
 import { metricOracleFeedPrice } from '../metrics'
 import { eventsIter, median } from '../utils'
-import { IPrice, PriceFeed, UPDATE } from './PriceFeed'
+import { IPrice, PriceFeed, UPDATE, SubAggregatedFeeds } from './PriceFeed'
 
 export class AggregatedFeed {
   public emitter = new EventEmitter()
@@ -20,7 +20,8 @@ export class AggregatedFeed {
     public pair: string,
     private oracle: string,
     private errorNotifier?: ErrorNotifier,
-    private submitterConf?: SolinkSubmitterConfig
+    private submitterConf?: SolinkSubmitterConfig,
+    private subAggregatedFeeds?: SubAggregatedFeeds
   ) {
     this.logger = log.child({
       oracle: oracle,
@@ -36,7 +37,7 @@ export class AggregatedFeed {
 
     let i = 0
     for (let feed of this.feeds) {
-      feed.subscribe(pair, this.submitterConf)
+      feed.subscribe(pair, this.submitterConf, this.subAggregatedFeeds)
       this.lastUpdate.set(`${feed.source}-${pair}`, {
         feed,
         updatedAt: Date.now()
