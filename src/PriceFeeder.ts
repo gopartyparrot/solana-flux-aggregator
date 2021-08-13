@@ -6,9 +6,18 @@ import { conn } from './context'
 import { AggregatorDeployFile } from './Deployer'
 import { ErrorNotifier } from './ErrorNotifier'
 import {
-  AggregatedFeed, Binance, BinanceInverse, BitStamp,
-  CoinBase, CoinBaseInverse, FileSource,
-  FTX, FTXInverse, LpToken, OKEx, PriceFeed
+  AggregatedFeed,
+  Binance,
+  BinanceInverse,
+  BitStamp,
+  CoinBase,
+  CoinBaseInverse,
+  FileSource,
+  FTX,
+  FTXInverse,
+  LpToken,
+  OKEx,
+  PriceFeed
 } from './feeds'
 import { log } from './log'
 import { metricOracleBalanceSol } from './metrics'
@@ -45,7 +54,12 @@ export class PriceFeeder {
     let distinctSources = [
       ...new Set(
         Object.keys(this.solinkConfig.submitter)
-          .map(key => this.solinkConfig.submitter[key].source || [])
+          .map(key => {
+            const sources = this.solinkConfig.submitter[key].source || []
+            const additionalSources =
+              this.solinkConfig.submitter[key].additionalSources || []
+            return [...sources, ...additionalSources]
+          })
           .reduce((a, b) => a.concat(b), [])
       )
     ]
@@ -115,8 +129,39 @@ export class PriceFeeder {
         continue
       }
       log.info(`feeds for ${name}: ${pairFeeds.map(f => f.source).join(',')}`)
-      const oracleName  = this.getOracleName();
-      const feed = new AggregatedFeed(pairFeeds, name, oracleName, errorNotifier, submitterConf)
+      const oracleName = this.getOracleName()
+      const subPriceFeeds: {
+        [key: string]: AggregatedFeed
+      } = {}
+      if (submitterConf.lpToken) {
+        submitterConf.lpToken.holders.forEach(holder => {
+          if (!holder.feed.config) {
+            return null
+          }
+          const subSources = holder.feed.config?.source || []
+          const subPairFeeds = this.feeds.filter(f =>
+            subSources.includes(f.source)
+          )
+          const subName = holder.feed.name
+
+          const subFeed = new AggregatedFeed(
+            subPairFeeds,
+            subName,
+            oracleName,
+            errorNotifier,
+            undefined
+          )
+          subPriceFeeds[subName] = subFeed
+        })
+      }
+      const feed = new AggregatedFeed(
+        pairFeeds,
+        name,
+        oracleName,
+        errorNotifier,
+        submitterConf,
+        subPriceFeeds
+      )
       const priceFeed = feed.medians()
       const chainlinkMode = !!process.env.CHAINLINK_NODE_URL
 
@@ -168,11 +213,11 @@ export class PriceFeeder {
         oracleName = result[0]
       }
     }
-    return oracleName;
+    return oracleName
   }
 
-  private async startMetricBalance() {    
-    const oracleName  = this.getOracleName();
+  private async startMetricBalance() {
+    const oracleName = this.getOracleName()
     const balance = await conn.getBalance(this.wallet.account.publicKey)
     metricOracleBalanceSol.set(
       {
@@ -181,7 +226,7 @@ export class PriceFeeder {
       balance / 10 ** 9
     )
 
-    conn.onAccountChange(this.wallet.account.publicKey, account => {      
+    conn.onAccountChange(this.wallet.account.publicKey, account => {
       metricOracleBalanceSol.set(
         {
           submitter: oracleName
