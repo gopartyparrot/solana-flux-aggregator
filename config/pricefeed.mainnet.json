@@ -18,6 +18,36 @@
       "source": ["ftx", "coinbase"],
       "minValueChangeForNewRound": 600
     },
+    "lptoken_ray_sol_usdc:usd": {
+      "source": ["lptoken"],
+      "minValueChangeForNewRound": 10,
+      "additionalSources": ["ftx", "coinbase"],
+      "lpToken": {
+        "lpTokenAddress": "8HoQnePLqPj4M7PUDzfw8e3Ymdwgc7NLGnaTUapubyvu",
+        "decimals": 2,
+        "holders": [
+          {
+            "symbol": "sol",
+            "address": "DQyrAcCrDXQ7NeoqGgDCZwBvWDcYmFCjSb9JtteuvPpz",
+            "feed": {
+              "name": "sol:usd",
+              "config": {
+                "source": ["ftx", "coinbase"]
+              }
+            },
+            "decimals": 9
+          },
+          {
+            "symbol": "usdc",
+            "address": "HLmqeL62xR1QoZ1HKKbXRrdN1p3phKpxRMb2VVopvBBz",
+            "feed": {
+              "name": "usd:usd"
+            },
+            "decimals": 6
+          }
+        ]
+      }
+    },
     "default": {
       "source": [],
       "minValueChangeForNewRound": 100
