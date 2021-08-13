@@ -1,11 +1,11 @@
 import EventEmitter from 'events'
 import { Logger } from 'winston'
-import { FeedSource } from '../config'
+import { FeedSource, SolinkSubmitterConfig } from '../config'
 import { ErrorNotifier } from '../ErrorNotifier'
 import { log } from '../log'
 import { metricOracleFeedPrice } from '../metrics'
 import { eventsIter, median } from '../utils'
-import { IPrice, PriceFeed, UPDATE } from './PriceFeed'
+import { IPrice, PriceFeed, UPDATE, SubAggregatedFeeds } from './PriceFeed'
 
 export class AggregatedFeed {
   public emitter = new EventEmitter()
@@ -19,7 +19,9 @@ export class AggregatedFeed {
     public feeds: PriceFeed[],
     public pair: string,
     private oracle: string,
-    private errorNotifier?: ErrorNotifier
+    private errorNotifier?: ErrorNotifier,
+    private submitterConf?: SolinkSubmitterConfig,
+    private subAggregatedFeeds?: SubAggregatedFeeds
   ) {
     this.logger = log.child({
       oracle: oracle,
@@ -35,7 +37,7 @@ export class AggregatedFeed {
 
     let i = 0
     for (let feed of this.feeds) {
-      feed.subscribe(pair)
+      feed.subscribe(pair, this.submitterConf, this.subAggregatedFeeds)
       this.lastUpdate.set(`${feed.source}-${pair}`, {
         feed,
         updatedAt: Date.now()
@@ -85,7 +87,7 @@ export class AggregatedFeed {
     setInterval(() => {
       // Check feeds websocket connection
       for (const feed of this.feeds) {
-        if (feed.conn.readyState !== feed.conn.OPEN) {
+        if (!feed.checkConnection()) {
           const meta = {
             feed: this.pair,
             source: feed.source,
@@ -97,7 +99,7 @@ export class AggregatedFeed {
             `Websocket is not connected, try to reconnect`,
             meta
           )
-          feed.conn.reconnect()
+          feed.reconnect()
         }
       }
 
@@ -120,7 +122,7 @@ export class AggregatedFeed {
             `No price data from websocket, try to reconnect`,
             meta
           )
-          feedInfo.feed.conn.reconnect()
+          feedInfo.feed.reconnect()
         }
       }
     }, this.lastUpdateTimeout / 2)
@@ -148,15 +150,10 @@ export class AggregatedFeed {
       return
     }
 
-    const now = Date.now()
-    const acceptedTime = now - 2 * 60 * 1000 // 5 minutes ago
-
-
+    const updateTime = Math.max(...prices.map(price => price.time));
     const values = prices
       // accept only prices > 0 that have been updated within 5 minutes
-      .filter(price => price.value > 0 && price.time >= acceptedTime)
-      // Temporary ignore FTX prices from median
-      .filter(price => price.source !== FeedSource.FTX)
+      .filter(price => price.value > 0)
       .map(price => price.value)
 
     return {
@@ -164,7 +161,7 @@ export class AggregatedFeed {
       pair: prices[0].pair,
       decimals: prices[0].decimals,
       value: median(values),
-      time: now
+      time: updateTime
     }
   }
 }

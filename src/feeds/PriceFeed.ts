@@ -2,7 +2,8 @@ import EventEmitter from 'events'
 import ReconnectingWebSocket from 'reconnecting-websocket'
 import winston from 'winston'
 import WebSocket from 'ws'
-import { FeedSource } from '../config'
+import { FeedSource, SolinkSubmitterConfig } from '../config'
+import { AggregatedFeed } from './AggregatedFeed'
 
 export const UPDATE = 'UPDATE'
 
@@ -18,10 +19,14 @@ export interface IPriceFeed {
   [Symbol.asyncIterator]: () => AsyncIterator<IPrice>
 }
 
+export interface SubAggregatedFeeds {
+  [key: string]: AggregatedFeed
+}
+
 export abstract class PriceFeed {
   public emitter = new EventEmitter()
 
-  public conn!: ReconnectingWebSocket
+  protected conn!: ReconnectingWebSocket
   protected connected!: Promise<void>
 
   protected abstract get log(): winston.Logger
@@ -62,7 +67,7 @@ export abstract class PriceFeed {
       })
 
       conn.addEventListener('message', msg => {
-        this.log.debug('raw price update', { msg })
+        // this.log.debug('raw price update', { msg })
         try {
           const price = this.parseMessage(msg.data)
           if (price) {
@@ -77,7 +82,15 @@ export abstract class PriceFeed {
     return this.connected
   }
 
-  subscribe(pair: string) {
+  checkConnection() {
+    return this.conn && this.conn.readyState === this.conn.OPEN
+  }
+
+  reconnect() {
+    this.conn.reconnect();
+  }
+
+  subscribe(pair: string, submitterConf?: SolinkSubmitterConfig, subAggregatedFeeds?: SubAggregatedFeeds) {
     if (this.pairs.includes(pair)) {
       // already subscribed
       return

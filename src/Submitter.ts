@@ -145,7 +145,6 @@ export class Submitter {
       }
 
       try {
-        // TODO: save price as currentValue, in submitCurrentValue check price.time
         // Do not submit price older then 5 minutes
         this.currentValue = new BN(price.value)
         this.currentValueUpdatedAt = price.time
