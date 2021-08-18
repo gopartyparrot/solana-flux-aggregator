@@ -48,6 +48,36 @@
         ]
       }
     },
+    "lptoken_ray_mer_usdc:usd": {
+      "source": ["lptoken"],
+      "minValueChangeForNewRound": 10,
+      "additionalSources": ["ftx", "coinbase"],
+      "lpToken": {
+        "lpTokenAddress": "3H9NxvaZoxMZZDZcbBDdWMKbrfNj7PCF5sbRwDr7SdDW",
+        "decimals": 2,
+        "holders": [
+          {
+            "symbol": "mer",
+            "address": "6XZ1hoJQZARtyA17mXkfnKSHWK2RvocC3UDNsY7f4Lf6",
+            "feed": {
+              "name": "mer:usd",
+              "config": {
+                "source": ["ftx", "coinbase"]
+              }
+            },
+            "decimals": 6
+          },
+          {
+            "symbol": "usdc",
+            "address": "F4opwQUoVhVRaf3CpMuCPpWNcB9k3AXvMMsfQh52pa66",
+            "feed": {
+              "name": "usd:usd"
+            },
+            "decimals": 6
+          }
+        ]
+      }
+    },
     "default": {
       "source": [],
       "minValueChangeForNewRound": 100

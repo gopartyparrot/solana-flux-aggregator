@@ -341,6 +341,63 @@
         }
       },
       "requesters": {}
+    },
+    "lptoken_ray_mer_usdc:usd": {
+      "pubkey": {
+        "type": "PublicKey",
+        "base58": "72qcEpuDzAEytUeHy9YePmV5Nbf3aNSXCKw9u7XPS1NE"
+      },
+      "owner": {
+        "type": "PublicKey",
+        "base58": "948Bbcg3mUjSVeqeg54QC73BNJgtRdbFevYopDGeaSf6"
+      },
+      "config": {
+        "description": "lptoken_ray_mer_usdc:usd",
+        "decimals": 2,
+        "roundTimeout": 0,
+        "minSubmissions": 1,
+        "maxSubmissions": 3,
+        "restartDelay": 0,
+        "requesterRestartDelay": 0,
+        "rewardTokenAccount": {
+          "type": "PublicKey",
+          "base58": "3oLHHTaRqNsuTMjsTtkVy8bock6Bx8gCmDxku4TurVj1"
+        },
+        "rewardAmount": 10000
+      },
+      "oracles": {
+        "mallard": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "FECe2qU5MtjRwU1bz9hPFJ3nVk4FyXwddeGFwsV5Mh2B"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "2uXiqUavNfVADitNHBo986EmBnSXQ5gMLH9KPKaQmTBM"
+          }
+        },
+        "goldfinch": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "4DBUgypJ1rJBP2DrKUgJsjSt1mbyUJk7HRLYXJePRjbp"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "5PumoPt8czaT3CrW1RNioSj7PJXpKvczUvVbctAdCkRT"
+          }
+        },
+        "siskin": {
+          "pubkey": {
+            "type": "PublicKey",
+            "base58": "98yZfhSvKfDfmsm3gwMfademYR3DftjgE4z176Rnfq9C"
+          },
+          "owner": {
+            "type": "PublicKey",
+            "base58": "Gtsu94Vbwm2hNyR5k3U4djkD69pX52HsY63q2forFDDp"
+          }
+        }
+      },
+      "requesters": {}
     }
   },
   "programID": {
