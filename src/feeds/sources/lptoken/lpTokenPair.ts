@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js'
 import throttle from 'lodash.throttle'
-import { SolinkSubmitterConfig } from '../../../config'
+import { SolinkSubmitterConfig, SolinkLpTokenHolderConfig } from '../../../config'
 import { IPrice, SubAggregatedFeeds } from '../../PriceFeed'
 import { LpToken, ACCOUNT_CHANGED, AccounChanged, oraclePrice } from './lptoken'
 
@@ -25,9 +25,11 @@ export class LpTokenPair {
     }
 
     this.addresses.push(this.config.lpToken.lpTokenAddress)
-    this.config.lpToken.holders.forEach(holder => {
-      this.addresses.push(holder.address)
-    })
+    this.addresses.push(this.config.lpToken.ammOpenOrders)
+    this.addresses.push(this.config.lpToken.ammId)
+    this.addresses.push(this.config.lpToken.holders.base.address)
+    this.addresses.push(this.config.lpToken.holders.quote.address)
+
     const generatePriceThrottle = throttle(this.generatePrice, DELAY_TIME, {
       trailing: true,
       leading: false
@@ -57,26 +59,57 @@ export class LpTokenPair {
     });
   }
 
+  getAmountInUSD = (holder: SolinkLpTokenHolderConfig, openOrderAmount: string, ammAmount: string): BigNumber => {
+    const tokenAccount = this.lpToken.getHolderAccount(holder.address)
+    const oracle = this.oracles.get(holder.feed.name)
+    if (!tokenAccount || !oracle) {
+      throw new Error('no token values or oracles')
+    }
+    const liquidity = new BigNumber(tokenAccount.amount.toString())
+      .plus(new BigNumber(openOrderAmount))
+      .minus(new BigNumber(ammAmount))
+
+    this.lpToken.log.debug('pool liquidity', { liquidity: liquidity.toString(), symbol: holder.symbol, pair: this.pair });
+    const value = new BigNumber(liquidity)
+      .times(new BigNumber(oracle.price))
+      .multipliedBy(
+        new BigNumber(10).pow(-holder.decimals - oracle.decimals)
+      )
+
+    this.lpToken.log.debug('pool liquidity value', { value: value.toString(), symbol: holder.symbol, pair: this.pair });
+
+    return value
+  }
+
   getTotalValue = () => {
     try {
-      return this.config?.lpToken?.holders.reduce<BigNumber>(
-        (total: BigNumber, holder) => {
-          const tokenAccount = this.lpToken.getHolderAccount(holder.address)
-          const oracle = this.oracles.get(holder.feed.name)
-          if (!tokenAccount || !oracle) {
-            throw new Error('no token values or oracles')
-          }
+      if (!this.config || !this.config.lpToken) {
+        throw new Error('no lp token config')
+      }
+      const ammOpenOrders = this.config?.lpToken?.ammOpenOrders;
+      const ammId = this.config?.lpToken?.ammId;
+      const openOrderInfo = this.lpToken.getOpenOrdersInfo(ammOpenOrders);
+      if (ammOpenOrders && !openOrderInfo) {
+        throw new Error(`no open order info ${ammOpenOrders}`)
+      }
+      const ammInfo = this.lpToken.getAmmInfo(ammId);
+      if (ammId && !ammInfo) {
+        throw new Error(`no amm info ${ammId}`)
+      }
 
-          const curValue = new BigNumber(tokenAccount.amount.toString())
-            .times(new BigNumber(oracle.price))
-            .multipliedBy(
-              new BigNumber(10).pow(-holder.decimals - oracle.decimals)
-            )
-  
-          return total.plus(curValue)
-        },
-        new BigNumber(0)
-      );
+      const baseAmount = this.getAmountInUSD(
+        this.config.lpToken.holders.base,
+        openOrderInfo?.baseTokenTotal || '0',
+        ammInfo?.needTakePnlPc || '0'
+      )
+
+      const quoteAmount = this.getAmountInUSD(
+        this.config.lpToken.holders.quote,
+        openOrderInfo?.quoteTokenTotal || '0',
+        ammInfo?.needTakePnlPc || '0'
+      )
+      
+      return new BigNumber(baseAmount).plus(quoteAmount)
     } catch (err) {
       this.lpToken.log.warn('get total value failed', err);
       return undefined;

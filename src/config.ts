@@ -75,8 +75,9 @@ export interface SolinkConfig {
   }
 }
 
-interface SolinkLpTokenHolderConfig {
+export interface SolinkLpTokenHolderConfig {
   address: string
+  symbol?: string
   // oracle: string
   feed: {
     name: string
@@ -89,7 +90,14 @@ interface SolinkLpTokenHolderConfig {
 
 interface SolinkLpTokenSubmitterConfig {
   lpTokenAddress: string
-  holders: SolinkLpTokenHolderConfig[]
+  version: number
+  ammId: string
+  ammOpenOrders: string
+  serumProgramId: string
+  holders: {
+    base: SolinkLpTokenHolderConfig,
+    quote: SolinkLpTokenHolderConfig
+  }
   decimals: number
 }
 
