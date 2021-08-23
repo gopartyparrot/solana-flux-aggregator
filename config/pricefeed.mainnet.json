@@ -25,8 +25,12 @@
       "lpToken": {
         "lpTokenAddress": "8HoQnePLqPj4M7PUDzfw8e3Ymdwgc7NLGnaTUapubyvu",
         "decimals": 2,
-        "holders": [
-          {
+        "version": 4,
+        "ammId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
+        "ammOpenOrders": "HRk9CMrpq7Jn9sh7mzxE8CChHG8dneX9p475QKz4Fsfc",
+        "serumProgramId": "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin",
+        "holders": {
+          "base": {
             "symbol": "sol",
             "address": "DQyrAcCrDXQ7NeoqGgDCZwBvWDcYmFCjSb9JtteuvPpz",
             "feed": {
@@ -37,7 +41,7 @@
             },
             "decimals": 9
           },
-          {
+          "quote": {
             "symbol": "usdc",
             "address": "HLmqeL62xR1QoZ1HKKbXRrdN1p3phKpxRMb2VVopvBBz",
             "feed": {
@@ -45,7 +49,7 @@
             },
             "decimals": 6
           }
-        ]
+        }
       }
     },
     "default": {
