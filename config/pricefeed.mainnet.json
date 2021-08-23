@@ -55,31 +55,35 @@
     "lptoken_ray_mer_usdc:usd": {
       "source": ["lptoken"],
       "minValueChangeForNewRound": 10,
-      "additionalSources": ["ftx", "coinbase"],
+      "additionalSources": ["ftx"],
       "lpToken": {
         "lpTokenAddress": "3H9NxvaZoxMZZDZcbBDdWMKbrfNj7PCF5sbRwDr7SdDW",
-        "decimals": 2,
-        "holders": [
-          {
+        "decimals": 6,
+        "version": 4,
+        "ammId": "BkfGDk676QFtTiGxn7TtEpHayJZRr6LgNk9uTV2MH4bR",
+        "ammOpenOrders": "FNwXaqyYNKNwJ8Qc39VGzuGnPcNTCVKExrgUKTLCcSzU",
+        "serumProgramId": "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin",
+        "holders": {
+          "base": {
             "symbol": "mer",
             "address": "6XZ1hoJQZARtyA17mXkfnKSHWK2RvocC3UDNsY7f4Lf6",
             "feed": {
               "name": "mer:usd",
               "config": {
-                "source": ["ftx", "coinbase"]
+                "source": ["ftx"]
               }
             },
             "decimals": 6
           },
-          {
-            "symbol": "usdc",
+          "quote": {
+            "symbol": "usdt",
             "address": "F4opwQUoVhVRaf3CpMuCPpWNcB9k3AXvMMsfQh52pa66",
             "feed": {
               "name": "usd:usd"
             },
             "decimals": 6
           }
-        ]
+        }
       }
     },
     "default": {
