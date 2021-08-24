@@ -62,8 +62,13 @@ export class LpTokenPair {
   getAmountInUSD = (holder: SolinkLpTokenHolderConfig, openOrderAmount: string, ammAmount: string): BigNumber => {
     const tokenAccount = this.lpToken.getHolderAccount(holder.address)
     const oracle = this.oracles.get(holder.feed.name)
-    if (!tokenAccount || !oracle) {
-      throw new Error('no token values or oracles')
+    if (!tokenAccount) {
+      this.lpToken.log.debug('no token holder', { pair: this.pair, symbol: holder.symbol });
+      throw new Error('no token holder values, it is ok if in warm-up phase')
+    }
+    if (!oracle) {
+      this.lpToken.log.debug('no oracle price', { pair: this.pair, name: holder.feed.name });
+      throw new Error('no oracle price, it is ok if in warm-up phase')
     }
     const liquidity = new BigNumber(tokenAccount.amount.toString())
       .plus(new BigNumber(openOrderAmount))

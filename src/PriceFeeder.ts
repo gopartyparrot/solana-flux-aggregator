@@ -150,7 +150,7 @@ export class PriceFeeder {
             subName,
             oracleName,
             errorNotifier,
-            undefined
+            holder.feed.config
           )
           subPriceFeeds[subName] = subFeed
         })
