@@ -58,7 +58,7 @@
       "additionalSources": ["ftx"],
       "lpToken": {
         "lpTokenAddress": "3H9NxvaZoxMZZDZcbBDdWMKbrfNj7PCF5sbRwDr7SdDW",
-        "decimals": 6,
+        "decimals": 4,
         "version": 4,
         "ammId": "BkfGDk676QFtTiGxn7TtEpHayJZRr6LgNk9uTV2MH4bR",
         "ammOpenOrders": "FNwXaqyYNKNwJ8Qc39VGzuGnPcNTCVKExrgUKTLCcSzU",
