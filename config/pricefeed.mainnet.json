@@ -54,7 +54,7 @@
     },
     "lptoken_ray_mer_usdc:usd": {
       "source": ["lptoken"],
-      "minValueChangeForNewRound": 10,
+      "minValueChangeForNewRound": 100,
       "additionalSources": ["ftx"],
       "lpToken": {
         "lpTokenAddress": "3H9NxvaZoxMZZDZcbBDdWMKbrfNj7PCF5sbRwDr7SdDW",
