@@ -353,7 +353,7 @@
       },
       "config": {
         "description": "lptoken_ray_mer_usdc:usd",
-        "decimals": 2,
+        "decimals": 4,
         "roundTimeout": 0,
         "minSubmissions": 1,
         "maxSubmissions": 3,
