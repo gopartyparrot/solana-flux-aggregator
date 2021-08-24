@@ -175,8 +175,7 @@ info:     mnemonic: ....
 info:     airdrop 10 SOL {"address":"8CGZz277PT6yA7nU6HEdpbwQsNYLvyJhP1guoUNxt9mF"}
 ```
 
-Save the mnemonic in your `.env` file, and give the address to me. I'll add
-you to the oracle list so you can submit.
+Save the mnemonic in your `.env` file, and give the address to me. I'll add you to the oracle list so you can submit.
 
 ## Using file based price feed
 

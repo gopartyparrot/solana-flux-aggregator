@@ -356,7 +356,7 @@
         "decimals": 4,
         "roundTimeout": 0,
         "minSubmissions": 1,
-        "maxSubmissions": 3,
+        "maxSubmissions": 13,
         "restartDelay": 0,
         "requesterRestartDelay": 0,
         "rewardTokenAccount": {
