@@ -20,13 +20,17 @@
     },
     "lptoken_ray_sol_usdc:usd": {
       "source": ["lptoken"],
-      "minValueChangeForNewRound": 10,
+      "minValueChangeForNewRound": 100,
       "additionalSources": ["ftx", "coinbase"],
       "lpToken": {
         "lpTokenAddress": "8HoQnePLqPj4M7PUDzfw8e3Ymdwgc7NLGnaTUapubyvu",
         "decimals": 2,
-        "holders": [
-          {
+        "version": 4,
+        "ammId": "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2",
+        "ammOpenOrders": "HRk9CMrpq7Jn9sh7mzxE8CChHG8dneX9p475QKz4Fsfc",
+        "serumProgramId": "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin",
+        "holders": {
+          "base": {
             "symbol": "sol",
             "address": "DQyrAcCrDXQ7NeoqGgDCZwBvWDcYmFCjSb9JtteuvPpz",
             "feed": {
@@ -37,7 +41,7 @@
             },
             "decimals": 9
           },
-          {
+          "quote": {
             "symbol": "usdc",
             "address": "HLmqeL62xR1QoZ1HKKbXRrdN1p3phKpxRMb2VVopvBBz",
             "feed": {
@@ -45,7 +49,41 @@
             },
             "decimals": 6
           }
-        ]
+        }
+      }
+    },
+    "lptoken_ray_mer_usdc:usd": {
+      "source": ["lptoken"],
+      "minValueChangeForNewRound": 100,
+      "additionalSources": ["ftx"],
+      "lpToken": {
+        "lpTokenAddress": "3H9NxvaZoxMZZDZcbBDdWMKbrfNj7PCF5sbRwDr7SdDW",
+        "decimals": 4,
+        "version": 4,
+        "ammId": "BkfGDk676QFtTiGxn7TtEpHayJZRr6LgNk9uTV2MH4bR",
+        "ammOpenOrders": "FNwXaqyYNKNwJ8Qc39VGzuGnPcNTCVKExrgUKTLCcSzU",
+        "serumProgramId": "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin",
+        "holders": {
+          "base": {
+            "symbol": "mer",
+            "address": "6XZ1hoJQZARtyA17mXkfnKSHWK2RvocC3UDNsY7f4Lf6",
+            "feed": {
+              "name": "mer:usd",
+              "config": {
+                "source": ["ftx"]
+              }
+            },
+            "decimals": 6
+          },
+          "quote": {
+            "symbol": "usdt",
+            "address": "F4opwQUoVhVRaf3CpMuCPpWNcB9k3AXvMMsfQh52pa66",
+            "feed": {
+              "name": "usd:usd"
+            },
+            "decimals": 6
+          }
+        }
       }
     },
     "default": {

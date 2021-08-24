@@ -134,7 +134,8 @@ export class PriceFeeder {
         [key: string]: AggregatedFeed
       } = {}
       if (submitterConf.lpToken) {
-        submitterConf.lpToken.holders.forEach(holder => {
+        const holders = [submitterConf.lpToken.holders.base, submitterConf.lpToken.holders.quote]
+        holders.forEach(holder => {
           if (!holder.feed.config) {
             return null
           }
@@ -149,7 +150,7 @@ export class PriceFeeder {
             subName,
             oracleName,
             errorNotifier,
-            undefined
+            holder.feed.config
           )
           subPriceFeeds[subName] = subFeed
         })

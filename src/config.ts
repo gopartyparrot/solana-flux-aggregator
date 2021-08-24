@@ -75,21 +75,27 @@ export interface SolinkConfig {
   }
 }
 
-interface SolinkLpTokenHolderConfig {
+export interface SolinkLpTokenHolderConfig {
   address: string
+  symbol?: string
   // oracle: string
   feed: {
     name: string
-    config: {
-      source: FeedSource[]
-    }
+    config?: SolinkSubmitterConfig
   }
   decimals: number
 }
 
 interface SolinkLpTokenSubmitterConfig {
   lpTokenAddress: string
-  holders: SolinkLpTokenHolderConfig[]
+  version: number
+  ammId: string
+  ammOpenOrders: string
+  serumProgramId: string
+  holders: {
+    base: SolinkLpTokenHolderConfig,
+    quote: SolinkLpTokenHolderConfig
+  }
   decimals: number
 }
 
@@ -97,7 +103,8 @@ export interface SolinkSubmitterConfig {
   source?: FeedSource[]
   additionalSources?: FeedSource[]
   inverse?: boolean
-  lpToken?: SolinkLpTokenSubmitterConfig,
+  lpToken?: SolinkLpTokenSubmitterConfig
+  lastUpdateTimeout?: number
   minValueChangeForNewRound: number
 }
 

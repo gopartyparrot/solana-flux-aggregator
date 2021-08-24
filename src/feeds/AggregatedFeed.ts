@@ -28,6 +28,10 @@ export class AggregatedFeed {
       aggregator: pair
     })
 
+    if (submitterConf && submitterConf.lastUpdateTimeout) {
+      this.lastUpdateTimeout = submitterConf.lastUpdateTimeout
+    }
+
     this.subscribe()
     this.startStaleChecker()
   }
