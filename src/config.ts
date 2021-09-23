@@ -104,6 +104,8 @@ export interface SolinkSubmitterConfig {
   additionalSources?: FeedSource[]
   inverse?: boolean
   lpToken?: SolinkLpTokenSubmitterConfig
+  serumMarketAddress?: string
+  serumDecimals?: number
   lastUpdateTimeout?: number
   minValueChangeForNewRound: number
 }
@@ -118,5 +120,6 @@ export enum FeedSource {
   BINANCE_INVERSE = "binance_inverse",
   OKEX = "okex",
   LPTOKEN = "lptoken",
+  SERUM = "serum",
   FILE = "file",
 }

@@ -5,6 +5,7 @@ export { CoinBase, CoinBaseInverse } from './sources/coinbase'
 export { FTX, FTXInverse } from './sources/ftx'
 export { OKEx } from './sources/okex'
 export { LpToken } from './sources/lptoken'
+export { Serum } from './sources/serum'
 export { FileSource } from './sources/file'
 export { PriceFeed } from './PriceFeed'
 

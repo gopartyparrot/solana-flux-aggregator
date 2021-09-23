@@ -17,6 +17,7 @@ import {
   FTXInverse,
   LpToken,
   OKEx,
+  Serum,
   PriceFeed
 } from './feeds'
 import { log } from './log'
@@ -45,6 +46,7 @@ export class PriceFeeder {
       new OKEx(),
       new Binance(),
       new BinanceInverse(),
+      new Serum(),
       new FileSource(5000, this.solinkConfig.priceFileDir || process.cwd())
     ]
   }
