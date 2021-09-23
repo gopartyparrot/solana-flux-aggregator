@@ -136,7 +136,10 @@ export class PriceFeeder {
         [key: string]: AggregatedFeed
       } = {}
       if (submitterConf.lpToken) {
-        const holders = [submitterConf.lpToken.holders.base, submitterConf.lpToken.holders.quote]
+        const holders = [
+          submitterConf.lpToken.holders.base,
+          submitterConf.lpToken.holders.quote
+        ]
         holders.forEach(holder => {
           if (!holder.feed.config) {
             return null
@@ -156,6 +159,21 @@ export class PriceFeeder {
           )
           subPriceFeeds[subName] = subFeed
         })
+      } else if (submitterConf.serum?.feed) {
+        const subSources = submitterConf.serum.feed.config?.source || []
+        const subPairFeeds = this.feeds.filter(f =>
+          subSources.includes(f.source)
+        )
+        const subName = submitterConf.serum.feed.name
+
+        const subFeed = new AggregatedFeed(
+          subPairFeeds,
+          subName,
+          oracleName,
+          errorNotifier,
+          submitterConf.serum.feed.config
+        )
+        subPriceFeeds[subName] = subFeed
       }
       const feed = new AggregatedFeed(
         pairFeeds,

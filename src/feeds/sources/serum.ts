@@ -9,6 +9,11 @@ import { log } from '../../log'
 import { IPrice, PriceFeed, SubAggregatedFeeds } from '../PriceFeed'
 import BigNumber from 'bignumber.js'
 
+interface oraclePrice {
+  price: number
+  decimals: number
+}
+
 const DELAY_TIME = 100
 const DEX_PID = new PublicKey('9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin')
 
@@ -16,6 +21,8 @@ interface PairData {
   bestBidPrice: number | undefined
   bestOfferPrice: number | undefined
   decimals: number
+  subPairName?: string
+  subPrice?: oraclePrice
 }
 
 export class Serum extends PriceFeed {
@@ -53,17 +60,17 @@ export class Serum extends PriceFeed {
     subAggregatedFeeds?: SubAggregatedFeeds
   ) {
     assert.ok(submitterConf, `Config error with ${this.source}`)
+    assert.ok(submitterConf.serum, `Config error with ${this.source}`)
     assert.ok(
-      submitterConf.serumMarketAddress,
+      submitterConf.serum.marketAddress,
       `Config error with ${this.source}`
     )
-    // assert.ok(subAggregatedFeeds, `Config error with ${this.source}`)
 
     this.log.debug('subscribe pair', { pair, submitterConf })
 
     const market = await Market.load(
       web3Conn,
-      new PublicKey(submitterConf.serumMarketAddress),
+      new PublicKey(submitterConf.serum.marketAddress),
       {},
       DEX_PID
     )
@@ -76,7 +83,7 @@ export class Serum extends PriceFeed {
     this.pairsData[pair] = {
       bestBidPrice: bestBid?.price,
       bestOfferPrice: bestOffer?.price,
-      decimals: submitterConf.serumDecimals ?? this.decimals
+      decimals: submitterConf.serum.decimals ?? this.decimals
     }
 
     const generatePriceThrottle = throttle(
@@ -87,6 +94,29 @@ export class Serum extends PriceFeed {
         leading: false
       }
     )
+
+    if (submitterConf.serum.feed) {
+      const subName = submitterConf.serum.feed.name
+      this.pairsData[pair].subPairName = subName
+      assert.ok(subAggregatedFeeds, `Config error with ${this.source}`)
+      const feed = subAggregatedFeeds[subName]
+      assert.ok(feed, `Config error with ${this.source}`)
+      const priceFeed = feed.medians()
+
+      for await (let price of priceFeed) {
+        // this.log.debug('sub oracle price ', { price });
+        // this.set(name, {
+        //   price: price.value,
+        //   decimals: price.decimals
+        // })
+
+        this.pairsData[pair].subPrice = {
+          price: price.value,
+          decimals: price.decimals
+        }
+        generatePriceThrottle()
+      }
+    }
 
     generatePriceThrottle()
 
@@ -107,6 +137,11 @@ export class Serum extends PriceFeed {
 
   generatePrice(pair: string) {
     const pairData = this.pairsData[pair] || {}
+
+    if (pairData.subPairName && !pairData.subPrice) {
+      this.log.debug('sub oracle price is not ready')
+      return
+    }
     const bestPrices: number[] = [
       pairData.bestBidPrice,
       pairData.bestOfferPrice
@@ -114,17 +149,25 @@ export class Serum extends PriceFeed {
     if (bestPrices.length === 0) {
       return
     }
-    this.log.debug('price', { bestPrices })
+    this.log.debug('price', { bestPrices, subPrice: pairData.subPrice })
 
-    const value = BigNumber.sum(...bestPrices)
+    let value = BigNumber.sum(...bestPrices)
       .times(new BigNumber(10).pow(pairData.decimals))
       .dividedBy(bestPrices.length)
-      .toNumber()
+
+    if (pairData.subPrice) {
+      value = value.times(
+        new BigNumber(pairData.subPrice.price).div(
+          new BigNumber(10).pow(pairData.subPrice.decimals)
+        )
+      )
+    }
+
     const price: IPrice = {
       source: this.source,
       pair,
       decimals: pairData.decimals,
-      value,
+      value: value.toNumber(),
       time: Date.now()
     }
     this.onMessage(price)
