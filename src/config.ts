@@ -86,6 +86,15 @@ export interface SolinkLpTokenHolderConfig {
   decimals: number
 }
 
+export interface SolinkSerumConfig {
+  marketAddress: string
+  feed: {
+    name: string
+    config?: SolinkSubmitterConfig
+  }
+  decimals: number
+}
+
 interface SolinkLpTokenSubmitterConfig {
   lpTokenAddress: string
   version: number
@@ -104,6 +113,7 @@ export interface SolinkSubmitterConfig {
   additionalSources?: FeedSource[]
   inverse?: boolean
   lpToken?: SolinkLpTokenSubmitterConfig
+  serum?: SolinkSerumConfig
   lastUpdateTimeout?: number
   minValueChangeForNewRound: number
 }
@@ -118,5 +128,6 @@ export enum FeedSource {
   BINANCE_INVERSE = "binance_inverse",
   OKEX = "okex",
   LPTOKEN = "lptoken",
+  SERUM = "serum",
   FILE = "file",
 }
