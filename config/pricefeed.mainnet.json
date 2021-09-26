@@ -86,6 +86,21 @@
         }
       }
     },
+    "prt:usd": {
+      "source": ["serum"],
+      "additionalSources": ["ftx", "coinbase"],
+      "serum": {
+        "marketAddress": "H7ZmXKqEx1T8CTM4EMyqR5zyz4e4vUpWTTbCmYmzxmeW",
+        "feed": {
+          "name": "sol:usd",
+          "config": {
+            "source": ["ftx", "coinbase"]
+          }
+        }
+      },
+      "minValueChangeForNewRound": 200,
+      "lastUpdateTimeout": 120000
+    },
     "default": {
       "source": [],
       "minValueChangeForNewRound": 100
