@@ -23,17 +23,23 @@ interface PairData {
   decimals: number
   subPairName?: string
   subPrice?: oraclePrice
+  generatePriceThrottle: () => void
+  market: Market
+  askSubId: number | null
+  bidSubId: number | null
 }
 
 export class Serum extends PriceFeed {
   public source = FeedSource.SERUM
   public decimals = 6
+  public lastUpdateTimeout = 12000
   public log = log.child({ class: this.source })
   public pairsData: {
     [key: string]: PairData
   } = {}
 
   protected baseurl = 'unused'
+  protected lastAccountChangeTs: number = new Date().getTime()
 
   async init() {
     this.log.debug('init', { baseurl: this.baseurl })
@@ -44,6 +50,12 @@ export class Serum extends PriceFeed {
     submitterConf?: SolinkSubmitterConfig,
     subAggregatedFeeds?: SubAggregatedFeeds
   ) {
+    if (submitterConf && submitterConf?.lastUpdateTimeout) {
+      if (submitterConf?.lastUpdateTimeout < this.lastUpdateTimeout) {
+        this.lastUpdateTimeout = submitterConf?.lastUpdateTimeout
+      }
+    }
+
     if (this.pairs.includes(pair)) {
       // already subscribed
       return
@@ -75,17 +87,6 @@ export class Serum extends PriceFeed {
       DEX_PID
     )
 
-    const bids = await market.loadBids(web3Conn)
-    const asks = await market.loadAsks(web3Conn)
-    const bestBid = bids.items(true).next().value
-    const bestOffer = asks.items(false).next().value
-
-    this.pairsData[pair] = {
-      bestBidPrice: bestBid?.price,
-      bestOfferPrice: bestOffer?.price,
-      decimals: submitterConf.serum.decimals ?? this.decimals
-    }
-
     const generatePriceThrottle = throttle(
       () => this.generatePrice(pair),
       DELAY_TIME,
@@ -94,6 +95,18 @@ export class Serum extends PriceFeed {
         leading: false
       }
     )
+
+    this.pairsData[pair] = {
+      bestBidPrice: undefined,
+      bestOfferPrice: undefined,
+      decimals: submitterConf.serum.decimals ?? this.decimals,
+      market,
+      generatePriceThrottle,
+      bidSubId: null,
+      askSubId: null
+    }
+
+    await this.fetchLastestSerumPrice(pair)
 
     if (submitterConf.serum.feed) {
       const subName = submitterConf.serum.feed.name
@@ -114,25 +127,68 @@ export class Serum extends PriceFeed {
           price: price.value,
           decimals: price.decimals
         }
-        generatePriceThrottle()
+        this.pairsData[pair].generatePriceThrottle()
       }
     }
 
     generatePriceThrottle()
 
-    web3Conn.onAccountChange(market.bidsAddress, async info => {
-      const bids = Orderbook.decode(market, info.data)
-      const newBestBid = bids.items(false).next().value
-      this.pairsData[pair].bestBidPrice = newBestBid?.price
-      generatePriceThrottle()
-    })
+    this.subscribeBids(pair)
+    this.subscribeAsks(pair)
+  }
 
-    web3Conn.onAccountChange(market.asksAddress, async info => {
-      const asks = Orderbook.decode(market, info.data)
-      const newBestOffer = asks.items(false).next().value
-      this.pairsData[pair].bestOfferPrice = newBestOffer?.price
-      generatePriceThrottle()
-    })
+  async fetchLastestSerumPrice(pair: string) {
+    const market = this.pairsData[pair].market
+    const bids = await market.loadBids(web3Conn)
+    const asks = await market.loadAsks(web3Conn)
+    const bestBid = bids.items(true).next().value
+    const bestOffer = asks.items(false).next().value
+    this.log.debug('fetchLastestSerumPrice ', { bestBid, bestOffer, pair })
+
+    this.pairsData[pair].bestBidPrice = bestBid?.price
+    this.pairsData[pair].bestOfferPrice = bestOffer?.price
+  }
+
+  subscribeBids(pair: string) {
+    const pairData = this.pairsData[pair]
+    if (pairData.bidSubId) {
+      web3Conn.removeAccountChangeListener(pairData.bidSubId)
+      pairData.bidSubId = null
+    }
+    this.log.info('subscribe bids', { pair })
+    const bidSubId = web3Conn.onAccountChange(
+      pairData.market.bidsAddress,
+      async info => {
+        this.lastAccountChangeTs = new Date().getTime()
+        const bids = Orderbook.decode(pairData.market, info.data)
+        const newBestBid = bids.items(true).next().value
+        this.log.debug('best bid price is changed', { newBestBid, pair })
+        pairData.bestBidPrice = newBestBid?.price
+        pairData.generatePriceThrottle()
+      }
+    )
+    pairData.bidSubId = bidSubId
+  }
+
+  subscribeAsks(pair: string) {
+    const pairData = this.pairsData[pair]
+    if (pairData.askSubId) {
+      web3Conn.removeAccountChangeListener(pairData.askSubId)
+      pairData.askSubId = null
+    }
+    this.log.info('subscribe asks', { pair })
+    const askSubId = web3Conn.onAccountChange(
+      pairData.market.asksAddress,
+      async info => {
+        this.lastAccountChangeTs = new Date().getTime()
+        const asks = Orderbook.decode(pairData.market, info.data)
+        const newBestOffer = asks.items(false).next().value
+        this.log.debug('best ask price is changed', { newBestOffer, pair })
+        pairData.bestOfferPrice = newBestOffer?.price
+        pairData.generatePriceThrottle()
+      }
+    )
+    pairData.askSubId = askSubId
   }
 
   generatePrice(pair: string) {
@@ -156,6 +212,8 @@ export class Serum extends PriceFeed {
       .dividedBy(bestPrices.length)
 
     if (pairData.subPrice) {
+      // convert price via another oracle price
+      // e.g. original price PRT:SOL, subPrice: SOL:USD, to get PRT:USD
       value = value.times(
         new BigNumber(pairData.subPrice.price).div(
           new BigNumber(10).pow(pairData.subPrice.decimals)
@@ -175,11 +233,22 @@ export class Serum extends PriceFeed {
 
   // web3.connect handle reconnection by itself
   checkConnection() {
+    const timeout = new Date().getTime() - this.lastAccountChangeTs
+    if (timeout > this.lastUpdateTimeout) {
+      return false
+    }
     return true
   }
 
   // web3.connect handle reconnection by itself
-  reconnect() {}
+  reconnect() {
+    for (const [pair] of Object.entries(this.pairsData)) {
+      this.log.info('reconnect serum price', { pair })
+      this.fetchLastestSerumPrice(pair)
+      this.subscribeAsks(pair)
+      this.subscribeBids(pair)
+    }
+  }
 
   //unused for lptoken price feed
   parseMessage(data: any): IPrice | undefined {
