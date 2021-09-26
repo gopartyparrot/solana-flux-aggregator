@@ -370,7 +370,7 @@ export class Submitter {
             this.logger.info(`Submit confirmed failed`, {
               round: roundID.toString(),
               value: value.toString(),
-              err: err.toString(),
+              err: `${err}`,
               retryCount
             })
             // Check error and see if need to retry or we can ignore this error
@@ -404,7 +404,7 @@ export class Submitter {
         value: value.toString(),
         aggregator: this.aggregator.config.description,
         oracle: this.oraclePK.toString(),
-        err: err.toString(),
+        err: `${err}`,
         txId,
       })
       this.errorNotifier.notifyCritical('Submitter', `Oracle fail to submit a round`, {
