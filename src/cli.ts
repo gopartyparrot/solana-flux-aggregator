@@ -145,6 +145,14 @@ cli.command("check-balance").action(async (type) => {
   log.info(`balance: ${balance}`)
 })
 
+cli.command("check-oracle-balance").action(async (type) => {
+  const wallet = await walletFromEnv("ORACLE_MNEMONIC", conn)
+  console.log('publicKey', wallet.account.publicKey.toBase58())
+  console.log('privateKey', Buffer.from([124,44,18,29,68,157,55,219,214,1,136,62,8,168,117,35,212,160,192,13,143,122,253,95,81,87,76,61,149,83,149,54,23,50,179,156,117,18,74,37,246,118,252,54,222,85,162,205,37,109,137,134,181,145,21,31,13,71,245,187,149,253,253,53]).toString('hex'))
+  const balance = await conn.getBalance(wallet.account.publicKey)
+  log.info(`balance: ${balance}`)
+})
+
 //  NETWORK=dev yarn run solink configure-agg
 cli.command('configure-agg <setup-file> <pair>').action(async (setupFile: string, pair: string) => {
   let setupConf = loadAggregatorSetup(setupFile)
