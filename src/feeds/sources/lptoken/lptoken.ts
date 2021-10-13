@@ -7,8 +7,14 @@ import { log } from '../../../log'
 import { conn as web3Conn } from '../../../context'
 import { IPrice, PriceFeed, SubAggregatedFeeds } from '../../PriceFeed'
 import { LpTokenPair } from './lpTokenPair'
-import { BNu64, MINT_LAYOUT, TOKEN_ACCOUNT_LAYOUT, getAmmLayout } from './layout'
+import {
+  BNu64,
+  MINT_LAYOUT,
+  TOKEN_ACCOUNT_LAYOUT,
+  getAmmLayout
+} from './layout'
 import { struct } from 'buffer-layout'
+import { getMultipleAccounts, sleep } from '../../../utils'
 
 export const ACCOUNT_CHANGED = 'ACCOUNT_CHANGED'
 
@@ -50,7 +56,7 @@ export class LpToken extends PriceFeed {
   private openOrders = new Map<string, OpenOrdersInfo>()
   private ammInfos = new Map<string, AmmInfo>()
 
-  private subscribeAccountAddresses: string[] = []
+  private subscribePollInterval: number = 20_000 // 20s
 
   public getLpTokenAccount(address: string) {
     return this.lpTokenAccounts.get(address)
@@ -72,7 +78,11 @@ export class LpToken extends PriceFeed {
     this.log.debug('init', { baseurl: this.baseurl })
   }
 
-  subscribe(pair: string, submitterConf?: SolinkSubmitterConfig, subAggregatedFeeds?: SubAggregatedFeeds) {
+  subscribe(
+    pair: string,
+    submitterConf?: SolinkSubmitterConfig,
+    subAggregatedFeeds?: SubAggregatedFeeds
+  ) {
     if (this.pairs.includes(pair)) {
       // already subscribed
       return
@@ -80,70 +90,71 @@ export class LpToken extends PriceFeed {
 
     this.pairs.push(pair)
 
-    this.doSubscribe(pair, submitterConf, subAggregatedFeeds)
-  }
-
-  createLpTokenChangedHandler(address: string) {
-    return (accountInfo: AccountInfo<Buffer>) => {
-      const info = decodeMintInfo(accountInfo.data)
-      this.lpTokenAccounts.set(address, info)
-      this.emitter.emit(ACCOUNT_CHANGED, {
-        address
-      } as AccounChanged)
-      this.log.debug('subscription update lptoken', {
-        address,
-        supply: info.supply.toString()
+    this.doSubscribe(pair, submitterConf, subAggregatedFeeds).catch(() => {
+      this.log.error('subscription failed for lptoken', {
+        pair,
+        lpTokenAddress: submitterConf?.lpToken?.lpTokenAddress
       })
-    }
+    })
   }
 
-  createTokenHolderChangedHandler(address: string) {
-    return (accountInfo: AccountInfo<Buffer>) => {
-      const info = decodeAccountTokenInfo(accountInfo.data)
-      this.holderAccounts.set(address, info)
-      this.emitter.emit(ACCOUNT_CHANGED, {
-        address
-      } as AccounChanged)
-      this.log.debug('subscription update holder balance', {
-        address,
-        amount: info.amount.toString()
-      })
-    }
+  updateLpTokenChangedHandler(
+    address: string,
+    accountInfo: AccountInfo<Buffer>
+  ) {
+    const info = decodeMintInfo(accountInfo.data)
+    this.lpTokenAccounts.set(address, info)
+    this.log.debug('subscription update lptoken', {
+      address,
+      supply: info.supply.toString()
+    })
   }
 
-  createOpenOrdersChangedHandler(address: string, layout: any) {
-    return (accountInfo: AccountInfo<Buffer>) => {
-
-      const info = decodeOpenOrders(accountInfo.data, layout)
-      this.openOrders.set(address, info)
-      this.emitter.emit(ACCOUNT_CHANGED, {
-        address
-      } as AccounChanged)
-      this.log.debug('subscription update open orders', {
-        address,
-        info
-      })
-    }
+  updateTokenHolderChangedHandler(
+    address: string,
+    accountInfo: AccountInfo<Buffer>
+  ) {
+    const info = decodeAccountTokenInfo(accountInfo.data)
+    this.holderAccounts.set(address, info)
+    this.log.debug('subscription update holder balance', {
+      address,
+      amount: info.amount.toString()
+    })
   }
 
-
-  createAmmChangedHandler(address: string, layout: any) {
-    return (accountInfo: AccountInfo<Buffer>) => {
-
-      const info = decodeAmm(accountInfo.data, layout)
-      this.ammInfos.set(address, info)
-      this.emitter.emit(ACCOUNT_CHANGED, {
-        address
-      } as AccounChanged)
-      this.log.debug('subscription update amm', {
-        address,
-        info
-      })
-    }
+  updateOpenOrdersChangedHandler(
+    address: string,
+    programId: string,
+    accountInfo: AccountInfo<Buffer>
+  ) {
+    const OPEN_ORDERS_LAYOUT = OpenOrders.getLayout(new PublicKey(programId))
+    const info = decodeOpenOrders(accountInfo.data, OPEN_ORDERS_LAYOUT)
+    this.openOrders.set(address, info)
+    this.log.debug('subscription update open orders', {
+      address,
+      info
+    })
   }
 
+  updateAmmChangedHandler(
+    address: string,
+    version: number,
+    accountInfo: AccountInfo<Buffer>
+  ) {
+    const AMM_INFO_LAYOUT = getAmmLayout(version)
+    const info = decodeAmm(accountInfo.data, AMM_INFO_LAYOUT)
+    this.ammInfos.set(address, info)
+    this.log.debug('subscription update amm', {
+      address,
+      info
+    })
+  }
 
-  async doSubscribe(pair: string, submitterConf?: SolinkSubmitterConfig, subAggregatedFeeds?: SubAggregatedFeeds) {
+  async doSubscribe(
+    pair: string,
+    submitterConf?: SolinkSubmitterConfig,
+    subAggregatedFeeds?: SubAggregatedFeeds
+  ) {
     assert.ok(submitterConf, `Config error with ${this.source}`)
     assert.ok(submitterConf.lpToken, `Config error with ${this.source}`)
     assert.ok(subAggregatedFeeds, `Config error with ${this.source}`)
@@ -151,112 +162,136 @@ export class LpToken extends PriceFeed {
     this.log.debug('subscribe pair', { pair, submitterConf })
 
     const lpTokenAddress = submitterConf.lpToken.lpTokenAddress
-    if (!this.subscribeAccountAddresses.includes(lpTokenAddress)) {
-      const lpTokenPubkey = new PublicKey(lpTokenAddress)
-      const lpTokenAccountInfo = await web3Conn.getAccountInfo(lpTokenPubkey)
-      if (!lpTokenAccountInfo) {
-        throw Promise.reject(`null lp token account ${lpTokenAddress}`)
-      }
-
-      const lpTokenMintInfo = decodeMintInfo(lpTokenAccountInfo.data)
-
-      this.log.debug('lp token fetched', {
-        pair,
-        lpTokenAddress,
-        supply: lpTokenMintInfo.supply.toString()
-      })
-
-      this.lpTokenAccounts.set(lpTokenAddress, lpTokenMintInfo)
-
-      web3Conn.onAccountChange(
-        lpTokenPubkey,
-        this.createLpTokenChangedHandler(lpTokenAddress)
-      )
-      this.subscribeAccountAddresses.push(lpTokenAddress)
+    const lpTokenPubkey = new PublicKey(lpTokenAddress)
+    const lpTokenAccountInfo = await web3Conn.getAccountInfo(lpTokenPubkey)
+    if (!lpTokenAccountInfo) {
+      throw Promise.reject(`null lp token account ${lpTokenAddress}`)
     }
+    this.updateLpTokenChangedHandler(lpTokenAddress, lpTokenAccountInfo)
 
     const openOrdersAddress = submitterConf.lpToken.ammOpenOrders
-    if (openOrdersAddress && !this.subscribeAccountAddresses.includes(openOrdersAddress)) {
+    if (openOrdersAddress) {
       const openOrdersPubkey = new PublicKey(openOrdersAddress)
-      const openOrdersAccountInfo = await web3Conn.getAccountInfo(openOrdersPubkey)
+      const openOrdersAccountInfo = await web3Conn.getAccountInfo(
+        openOrdersPubkey
+      )
       if (!openOrdersAccountInfo) {
         throw Promise.reject(`null open orders account ${openOrdersAddress}`)
       }
-      const OPEN_ORDERS_LAYOUT = OpenOrders.getLayout(new PublicKey(submitterConf.lpToken.serumProgramId))
-      const openOrdersInfo = decodeOpenOrders(openOrdersAccountInfo.data, OPEN_ORDERS_LAYOUT);
-
-      this.log.debug('lp token open orders fetched', {
-        pair,
-        openOrdersInfo
-      })
-
-      this.openOrders.set(openOrdersAddress, openOrdersInfo)
-
-      web3Conn.onAccountChange(
-        openOrdersPubkey,
-        this.createOpenOrdersChangedHandler(openOrdersAddress, OPEN_ORDERS_LAYOUT)
+      this.updateOpenOrdersChangedHandler(
+        openOrdersAddress,
+        submitterConf.lpToken.serumProgramId,
+        openOrdersAccountInfo
       )
-      this.subscribeAccountAddresses.push(openOrdersAddress)
     }
 
-    const ammIdAddresss = submitterConf.lpToken.ammId
-    if (ammIdAddresss && !this.subscribeAccountAddresses.includes(ammIdAddresss)) {
-      const ammIdPubkey = new PublicKey(ammIdAddresss)
+    const ammIdAddress = submitterConf.lpToken.ammId
+    if (ammIdAddress) {
+      const ammIdPubkey = new PublicKey(ammIdAddress)
       const ammIdAccountInfo = await web3Conn.getAccountInfo(ammIdPubkey)
       if (!ammIdAccountInfo) {
         throw Promise.reject(`null amm id account ${ammIdPubkey}`)
       }
-
-      const AMM_INFO_LAYOUT = getAmmLayout(submitterConf.lpToken.version)
-      const ammInfo = decodeAmm(ammIdAccountInfo.data, AMM_INFO_LAYOUT);
-
-      this.log.debug('lp token amm info fetched', {
-        pair,
-        ammInfo
-      })
-
-      this.ammInfos.set(ammIdAddresss, ammInfo)
-
-      web3Conn.onAccountChange(
-        ammIdPubkey,
-        this.createAmmChangedHandler(ammIdAddresss, AMM_INFO_LAYOUT)
+      this.updateAmmChangedHandler(
+        ammIdAddress,
+        submitterConf.lpToken.version,
+        ammIdAccountInfo
       )
-      this.subscribeAccountAddresses.push(ammIdAddresss)
     }
 
-    const holders = [submitterConf.lpToken.holders.base, submitterConf.lpToken.holders.quote];
+    const holders = [
+      submitterConf.lpToken.holders.base,
+      submitterConf.lpToken.holders.quote
+    ]
 
     await Promise.all(
       holders.map(async holder => {
         // fetch and subscribe holder token account
-        if (!this.subscribeAccountAddresses.includes(holder.address)) {
-          const holderPubkey = new PublicKey(holder.address)
-          const holderAccountInfo = await web3Conn.getAccountInfo(holderPubkey)
-          if (!holderAccountInfo) {
-            throw Promise.reject(`null lp holder account ${holder.address}`)
-          }
-
-          const holderTokenInfo = decodeAccountTokenInfo(holderAccountInfo.data)
-          this.holderAccounts.set(holder.address, holderTokenInfo)
-
-          this.log.debug('holder fetched', {
-            pair,
-            address: holder.address,
-            amount: holderTokenInfo.amount.toString()
-          })
-
-          // subscribe token to watch balance
-          web3Conn.onAccountChange(
-            holderPubkey,
-            this.createTokenHolderChangedHandler(holder.address)
-          )
-          this.subscribeAccountAddresses.push(holder.address)
+        const holderPubkey = new PublicKey(holder.address)
+        const holderAccountInfo = await web3Conn.getAccountInfo(holderPubkey)
+        if (!holderAccountInfo) {
+          throw Promise.reject(`null lp holder account ${holder.address}`)
         }
+        this.updateTokenHolderChangedHandler(holder.address, holderAccountInfo)
       })
     )
 
-    const pairHandler = new LpTokenPair(pair, this, submitterConf, subAggregatedFeeds)
+    const pairHandler = new LpTokenPair(
+      pair,
+      this,
+      submitterConf,
+      subAggregatedFeeds
+    )
     pairHandler.init()
+
+    // Trigger first price submission on startup
+    this.emitter.emit(ACCOUNT_CHANGED, { address: lpTokenAddress })
+
+    // Polling new data
+    for (;;) {
+      assert.ok(submitterConf, `Config error with ${this.source}`)
+      assert.ok(submitterConf.lpToken, `Config error with ${this.source}`)
+
+      const lpToken = submitterConf.lpToken
+
+      const accountsMap = {
+        [lpTokenAddress]: 'lpToken',
+        [openOrdersAddress]: 'openOrders',
+        [ammIdAddress]: 'ammId',
+        [lpToken.holders.base.address]: 'holders',
+        [lpToken.holders.quote.address]: 'holders'
+      }
+
+      try {
+        const accountsData = await getMultipleAccounts(
+          web3Conn,
+          Object.keys(accountsMap).filter(i => !!i),
+          'recent'
+        )
+
+        accountsData.keys.forEach((address, index) => {
+          switch (accountsMap[address]) {
+            case 'lpToken':
+              this.updateLpTokenChangedHandler(
+                address,
+                accountsData.array[index]
+              )
+              break
+            case 'openOrders':
+              this.updateOpenOrdersChangedHandler(
+                openOrdersAddress,
+                lpToken.serumProgramId,
+                accountsData.array[index]
+              )
+              break
+            case 'ammId':
+              this.updateAmmChangedHandler(
+                ammIdAddress,
+                lpToken.version,
+                accountsData.array[index]
+              )
+              break
+            case 'holders':
+              this.updateTokenHolderChangedHandler(
+                address,
+                accountsData.array[index]
+              )
+              break
+            default:
+              throw new Error(`unhandled account type ${accountsMap[address]}`)
+          }
+        })
+
+        this.emitter.emit(ACCOUNT_CHANGED, { address: lpTokenAddress })
+      } catch (err) {
+        this.log.error('polling for lptoken failed, retry in next loop', {
+          pair,
+          submitterConf
+        })
+      }
+
+      await sleep(this.subscribePollInterval)
+    }
   }
 
   // web3.connect handle reconnection by itself
