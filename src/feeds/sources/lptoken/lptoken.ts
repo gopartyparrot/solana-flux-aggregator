@@ -56,8 +56,7 @@ export class LpToken extends PriceFeed {
   private openOrders = new Map<string, OpenOrdersInfo>()
   private ammInfos = new Map<string, AmmInfo>()
 
-  private subscribePollInterval: number = 5_000 // 30s
-  private subscribeAccountAddresses: string[] = []
+  private subscribePollInterval: number = 20_000 // 20s
 
   public getLpTokenAccount(address: string) {
     return this.lpTokenAccounts.get(address)
