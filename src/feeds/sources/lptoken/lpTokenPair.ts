@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js'
 import throttle from 'lodash.throttle'
 import { SolinkSubmitterConfig, SolinkLpTokenHolderConfig } from '../../../config'
+import { Aggregator } from '../../../schema'
 import { IPrice, SubAggregatedFeeds } from '../../PriceFeed'
 import { LpToken, ACCOUNT_CHANGED, AccountChanged, oraclePrice } from './lptoken'
 
@@ -47,6 +48,15 @@ export class LpTokenPair {
 
     Object.keys(this.subAggregatedFeeds).forEach(async (name) => {
       const feed = this.subAggregatedFeeds[name];
+
+      if(!this.oracles.has(name)) {
+        let agg = await Aggregator.load(feed.deployInfo.aggregators[feed.pair].pubkey)
+        this.oracles.set(name, {
+          price: agg.answer.median.toNumber(),
+          decimals: agg.config.decimals
+        })
+      }
+
       for await (let price of feed.medians()) {
         this.lpToken.log.debug('sub oracle price ', { price });
         this.oracles.set(name, {

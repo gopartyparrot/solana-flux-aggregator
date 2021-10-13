@@ -20,7 +20,7 @@
     },
     "lptoken_ray_sol_usdc:usd": {
       "source": ["lptoken"],
-      "minValueChangeForNewRound": 100,
+      "minValueChangeForNewRound": 10,
       "additionalSources": ["ftx", "coinbase"],
       "lpToken": {
         "lpTokenAddress": "8HoQnePLqPj4M7PUDzfw8e3Ymdwgc7NLGnaTUapubyvu",
