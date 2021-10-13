@@ -67,7 +67,7 @@ export class LpTokenPair {
     }
     if (!oracle) {
       this.lpToken.log.debug('no oracle price', { pair: this.pair, name: holder.feed.name });
-      throw new Error('no oracle price, it is ok if in warm-up phase')
+      throw new Error(`no oracle price for ${holder.feed.name}, it is ok if in warm-up phase`)
     }
     const liquidity = new BigNumber(tokenAccount.amount.toString())
       .plus(new BigNumber(openOrderAmount))
@@ -115,7 +115,7 @@ export class LpTokenPair {
       
       return new BigNumber(baseAmount).plus(quoteAmount)
     } catch (err) {
-      this.lpToken.log.warn('get total value failed',{ err: `${err}`});
+      this.lpToken.log.warn('get total value failed', { name: this.pair, err: `${err}`});
       return undefined;
     }
   }
