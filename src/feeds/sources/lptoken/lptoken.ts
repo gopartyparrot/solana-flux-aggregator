@@ -14,7 +14,7 @@ import {
   getAmmLayout
 } from './layout'
 import { struct } from 'buffer-layout'
-import { getMultipleAccounts } from '../../../utils'
+import { getMultipleAccounts, sleep } from '../../../utils'
 
 export const ACCOUNT_CHANGED = 'ACCOUNT_CHANGED'
 
@@ -228,13 +228,11 @@ export class LpToken extends PriceFeed {
     this.emitter.emit(ACCOUNT_CHANGED, { address: lpTokenAddress })
 
     // Polling new data
-    setInterval(async () => {
+    for (;;) {
       assert.ok(submitterConf, `Config error with ${this.source}`)
       assert.ok(submitterConf.lpToken, `Config error with ${this.source}`)
 
       const lpToken = submitterConf.lpToken
-
-      lpToken.holders.base.address = ''
 
       const accountsMap = {
         [lpTokenAddress]: 'lpToken',
@@ -244,44 +242,56 @@ export class LpToken extends PriceFeed {
         [lpToken.holders.quote.address]: 'holders'
       }
 
-      const accountsData = await getMultipleAccounts(
-        web3Conn,
-        Object.keys(accountsMap).filter(i => !!i),
-        'recent'
-      )
+      try {
+        const accountsData = await getMultipleAccounts(
+          web3Conn,
+          Object.keys(accountsMap).filter(i => !!i),
+          'recent'
+        )
 
-      accountsData.keys.forEach((address, index) => {
-        switch (accountsMap[address]) {
-          case 'lpToken':
-            this.updateLpTokenChangedHandler(address, accountsData.array[index])
-            break
-          case 'openOrders':
-            this.updateOpenOrdersChangedHandler(
-              openOrdersAddress,
-              lpToken.serumProgramId,
-              accountsData.array[index]
-            )
-            break
-          case 'ammId':
-            this.updateAmmChangedHandler(
-              ammIdAddress,
-              lpToken.version,
-              accountsData.array[index]
-            )
-            break
-          case 'holders':
-            this.updateTokenHolderChangedHandler(
-              address,
-              accountsData.array[index]
-            )
-            break
-          default:
-            throw new Error(`unhandled account type ${accountsMap[address]}`)
-        }
-      })
+        accountsData.keys.forEach((address, index) => {
+          switch (accountsMap[address]) {
+            case 'lpToken':
+              this.updateLpTokenChangedHandler(
+                address,
+                accountsData.array[index]
+              )
+              break
+            case 'openOrders':
+              this.updateOpenOrdersChangedHandler(
+                openOrdersAddress,
+                lpToken.serumProgramId,
+                accountsData.array[index]
+              )
+              break
+            case 'ammId':
+              this.updateAmmChangedHandler(
+                ammIdAddress,
+                lpToken.version,
+                accountsData.array[index]
+              )
+              break
+            case 'holders':
+              this.updateTokenHolderChangedHandler(
+                address,
+                accountsData.array[index]
+              )
+              break
+            default:
+              throw new Error(`unhandled account type ${accountsMap[address]}`)
+          }
+        })
 
-      this.emitter.emit(ACCOUNT_CHANGED, { address: lpTokenAddress })
-    }, this.subscribePollInterval)
+        this.emitter.emit(ACCOUNT_CHANGED, { address: lpTokenAddress })
+      } catch (err) {
+        this.log.error('polling for lptoken failed, retry in next loop', {
+          pair,
+          submitterConf
+        })
+      }
+
+      await sleep(this.subscribePollInterval)
+    }
   }
 
   // web3.connect handle reconnection by itself
