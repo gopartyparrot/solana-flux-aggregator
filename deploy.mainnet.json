@@ -64,7 +64,7 @@
       },
       "owner": {
         "type": "PublicKey",
-        "base58": "948Bbcg3mUjSVeqeg54QC73BNJgtRdbFevYopDGeaSf6"
+        "base58": "5jwBGfXVpcEY9Hqmw2hCu77NMnoMeVKzgKCChf82d1Te"
       },
       "config": {
         "description": "ptt:usd",
@@ -235,7 +235,7 @@
       },
       "owner": {
         "type": "PublicKey",
-        "base58": "948Bbcg3mUjSVeqeg54QC73BNJgtRdbFevYopDGeaSf6"
+        "base58": "5jwBGfXVpcEY9Hqmw2hCu77NMnoMeVKzgKCChf82d1Te"
       },
       "config": {
         "description": "btc:usd",
@@ -292,7 +292,7 @@
       },
       "owner": {
         "type": "PublicKey",
-        "base58": "948Bbcg3mUjSVeqeg54QC73BNJgtRdbFevYopDGeaSf6"
+        "base58": "5jwBGfXVpcEY9Hqmw2hCu77NMnoMeVKzgKCChf82d1Te"
       },
       "config": {
         "description": "lptoken_ray_sol_usdc:usd",
@@ -349,7 +349,7 @@
       },
       "owner": {
         "type": "PublicKey",
-        "base58": "948Bbcg3mUjSVeqeg54QC73BNJgtRdbFevYopDGeaSf6"
+        "base58": "5jwBGfXVpcEY9Hqmw2hCu77NMnoMeVKzgKCChf82d1Te"
       },
       "config": {
         "description": "lptoken_ray_mer_usdc:usd",
@@ -406,7 +406,7 @@
       },
       "owner": {
         "type": "PublicKey",
-        "base58": "948Bbcg3mUjSVeqeg54QC73BNJgtRdbFevYopDGeaSf6"
+        "base58": "5jwBGfXVpcEY9Hqmw2hCu77NMnoMeVKzgKCChf82d1Te"
       },
       "config": {
         "description": "prt:usd",

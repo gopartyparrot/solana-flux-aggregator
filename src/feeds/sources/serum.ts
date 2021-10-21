@@ -1,5 +1,5 @@
 import { PublicKey } from '@solana/web3.js'
-import { Market, Orderbook } from '@project-serum/serum'
+import { Market } from '@project-serum/serum'
 import throttle from 'lodash.throttle'
 import assert from 'assert'
 
@@ -8,6 +8,7 @@ import { FeedSource, SolinkSubmitterConfig } from '../../config'
 import { log } from '../../log'
 import { IPrice, PriceFeed, SubAggregatedFeeds } from '../PriceFeed'
 import BigNumber from 'bignumber.js'
+import { sleep } from '../../utils'
 
 interface oraclePrice {
   price: number
@@ -40,6 +41,7 @@ export class Serum extends PriceFeed {
 
   protected baseurl = 'unused'
   protected lastAccountChangeTs: number = new Date().getTime()
+  private subscribePollInterval: number = 10_000 // 10s
 
   async init() {
     this.log.debug('init', { baseurl: this.baseurl })
@@ -63,7 +65,11 @@ export class Serum extends PriceFeed {
 
     this.pairs.push(pair)
 
-    this.doSubscribe(pair, submitterConf, subAggregatedFeeds)
+    this.doSubscribe(pair, submitterConf, subAggregatedFeeds).catch(() => {
+      this.log.error('subscription failed for serum feed', {
+        pair
+      })
+    })
   }
 
   async doSubscribe(
@@ -106,9 +112,23 @@ export class Serum extends PriceFeed {
       askSubId: null
     }
 
-    await this.fetchLastestSerumPrice(pair)
+    this.subscribeSubPrice(pair, submitterConf, subAggregatedFeeds)
+    this.subscribeAsks(pair)
+    this.subscribeBids(pair)
 
-    if (submitterConf.serum.feed) {
+    // Polling new data
+    for (;;) {
+      await this.fetchLatestSerumPrice(pair)
+      await sleep(this.subscribePollInterval)
+    }
+  }
+
+  async subscribeSubPrice(
+    pair: string,
+    submitterConf: SolinkSubmitterConfig,
+    subAggregatedFeeds?: SubAggregatedFeeds
+  ) {
+    if (submitterConf.serum?.feed) {
       const subName = submitterConf.serum.feed.name
       this.pairsData[pair].subPairName = subName
       assert.ok(subAggregatedFeeds, `Config error with ${this.source}`)
@@ -117,12 +137,7 @@ export class Serum extends PriceFeed {
       const priceFeed = feed.medians()
 
       for await (let price of priceFeed) {
-        // this.log.debug('sub oracle price ', { price });
-        // this.set(name, {
-        //   price: price.value,
-        //   decimals: price.decimals
-        // })
-
+        this.log.debug('sub oracle price ', { price })
         this.pairsData[pair].subPrice = {
           price: price.value,
           decimals: price.decimals
@@ -130,23 +145,6 @@ export class Serum extends PriceFeed {
         this.pairsData[pair].generatePriceThrottle()
       }
     }
-
-    generatePriceThrottle()
-
-    this.subscribeBids(pair)
-    this.subscribeAsks(pair)
-  }
-
-  async fetchLastestSerumPrice(pair: string) {
-    const market = this.pairsData[pair].market
-    const bids = await market.loadBids(web3Conn)
-    const asks = await market.loadAsks(web3Conn)
-    const bestBid = bids.items(true).next().value
-    const bestOffer = asks.items(false).next().value
-    this.log.debug('fetchLastestSerumPrice ', { bestBid, bestOffer, pair })
-
-    this.pairsData[pair].bestBidPrice = bestBid?.price
-    this.pairsData[pair].bestOfferPrice = bestOffer?.price
   }
 
   subscribeBids(pair: string) {
@@ -158,13 +156,8 @@ export class Serum extends PriceFeed {
     this.log.info('subscribe bids', { pair })
     const bidSubId = web3Conn.onAccountChange(
       pairData.market.bidsAddress,
-      async info => {
-        this.lastAccountChangeTs = new Date().getTime()
-        const bids = Orderbook.decode(pairData.market, info.data)
-        const newBestBid = bids.items(true).next().value
-        this.log.debug('best bid price is changed', { newBestBid, pair })
-        pairData.bestBidPrice = newBestBid?.price
-        pairData.generatePriceThrottle()
+      async () => {
+        await this.fetchLatestSerumPrice(pair)
       }
     )
     pairData.bidSubId = bidSubId
@@ -179,23 +172,32 @@ export class Serum extends PriceFeed {
     this.log.info('subscribe asks', { pair })
     const askSubId = web3Conn.onAccountChange(
       pairData.market.asksAddress,
-      async info => {
-        this.lastAccountChangeTs = new Date().getTime()
-        const asks = Orderbook.decode(pairData.market, info.data)
-        const newBestOffer = asks.items(false).next().value
-        this.log.debug('best ask price is changed', { newBestOffer, pair })
-        pairData.bestOfferPrice = newBestOffer?.price
-        pairData.generatePriceThrottle()
+      async () => {
+        await this.fetchLatestSerumPrice(pair)
       }
     )
     pairData.askSubId = askSubId
+  }
+
+  async fetchLatestSerumPrice(pair: string) {
+    const market = this.pairsData[pair].market
+    const bids = await market.loadBids(web3Conn)
+    const asks = await market.loadAsks(web3Conn)
+    const bestBid = bids.items(true).next().value
+    const bestOffer = asks.items(false).next().value
+    this.log.debug('fetchLatestSerumPrice ', { bestBid, bestOffer, pair })
+
+    this.pairsData[pair].bestBidPrice = bestBid?.price
+    this.pairsData[pair].bestOfferPrice = bestOffer?.price
+
+    this.pairsData[pair].generatePriceThrottle()
   }
 
   generatePrice(pair: string) {
     const pairData = this.pairsData[pair] || {}
 
     if (pairData.subPairName && !pairData.subPrice) {
-      this.log.debug('sub oracle price is not ready')
+      this.log.info('sub oracle price is not ready', { pair, subPrice: pairData.subPairName })
       return
     }
     const bestPrices: number[] = [
@@ -244,9 +246,7 @@ export class Serum extends PriceFeed {
   reconnect() {
     for (const [pair] of Object.entries(this.pairsData)) {
       this.log.info('reconnect serum price', { pair })
-      this.fetchLastestSerumPrice(pair)
-      this.subscribeAsks(pair)
-      this.subscribeBids(pair)
+      this.fetchLatestSerumPrice(pair)
     }
   }
 
