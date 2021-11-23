@@ -134,6 +134,16 @@ export class Submitter {
       await this.reloadStates()
       this.onAggregatorStateUpdate()
     })
+
+    // add polling in case onAccountChange stops receiving updates
+    setInterval(async () =>  {
+      this.aggregator = await Aggregator.load(this.aggregatorPK)
+      if (this.isRoundReported(this.aggregator.round.id)) {
+        return
+      }
+      await this.reloadStates()
+      this.onAggregatorStateUpdate()
+    }, 10_000)
   }
 
   private async observePriceFeed() {

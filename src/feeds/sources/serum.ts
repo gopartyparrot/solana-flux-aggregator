@@ -197,7 +197,7 @@ export class Serum extends PriceFeed {
     const pairData = this.pairsData[pair] || {}
 
     if (pairData.subPairName && !pairData.subPrice) {
-      this.log.info('sub oracle price is not ready', { pair, subPrice: pairData.subPairName })
+      this.log.warn('sub oracle price is not ready, is ok if warm up phase', { pair, subPrice: pairData.subPairName })
       return
     }
     const bestPrices: number[] = [
