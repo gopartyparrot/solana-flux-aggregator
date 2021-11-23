@@ -4,7 +4,7 @@
   "submitter": {
     "sol:usd": {
       "source": ["ftx", "coinbase"],
-      "minValueChangeForNewRound": 10
+      "minValueChangeForNewRound": 70
     },
     "srm:usdt": {
       "source": ["ftx", "binance"],
@@ -20,7 +20,7 @@
     },
     "lptoken_ray_sol_usdc:usd": {
       "source": ["lptoken"],
-      "minValueChangeForNewRound": 50,
+      "minValueChangeForNewRound": 100,
       "additionalSources": ["ftx", "coinbase"],
       "lpToken": {
         "lpTokenAddress": "8HoQnePLqPj4M7PUDzfw8e3Ymdwgc7NLGnaTUapubyvu",
