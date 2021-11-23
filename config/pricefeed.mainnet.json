@@ -4,7 +4,7 @@
   "submitter": {
     "sol:usd": {
       "source": ["ftx", "coinbase"],
-      "minValueChangeForNewRound": 10
+      "minValueChangeForNewRound": 70
     },
     "srm:usdt": {
       "source": ["ftx", "binance"],
@@ -98,7 +98,7 @@
           }
         }
       },
-      "minValueChangeForNewRound": 200,
+      "minValueChangeForNewRound": 100,
       "lastUpdateTimeout": 120000
     },
     "default": {

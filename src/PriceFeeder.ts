@@ -153,6 +153,7 @@ export class PriceFeeder {
           const subFeed = new AggregatedFeed(
             subPairFeeds,
             subName,
+            this.deployInfo,
             oracleName,
             errorNotifier,
             holder.feed.config
@@ -169,6 +170,7 @@ export class PriceFeeder {
         const subFeed = new AggregatedFeed(
           subPairFeeds,
           subName,
+          this.deployInfo,
           oracleName,
           errorNotifier,
           submitterConf.serum.feed.config
@@ -178,6 +180,7 @@ export class PriceFeeder {
       const feed = new AggregatedFeed(
         pairFeeds,
         name,
+        this.deployInfo,
         oracleName,
         errorNotifier,
         submitterConf,

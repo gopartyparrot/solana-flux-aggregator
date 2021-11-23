@@ -31,7 +31,7 @@ export type MintInfo = {
   supply: BNu64
   decimals: number
 }
-export interface AccounChanged {
+export interface AccountChanged {
   address: string
 }
 
@@ -56,7 +56,7 @@ export class LpToken extends PriceFeed {
   private openOrders = new Map<string, OpenOrdersInfo>()
   private ammInfos = new Map<string, AmmInfo>()
 
-  private subscribePollInterval: number = 20_000 // 20s
+  private subscribePollInterval: number = 10_000 // 10s
 
   public getLpTokenAccount(address: string) {
     return this.lpTokenAccounts.get(address)
@@ -322,7 +322,6 @@ function decodeMintInfo(data: Buffer): MintInfo {
   const info = MINT_LAYOUT.decode(data)
   info.supply = BNu64.fromBuffer(info.supply)
   info.decimals = info.decimals
-
   return info
 }
 
