@@ -1,8 +1,9 @@
 import BigNumber from 'bignumber.js'
 import throttle from 'lodash.throttle'
 import { SolinkSubmitterConfig, SolinkLpTokenHolderConfig } from '../../../config'
+import { Aggregator } from '../../../schema'
 import { IPrice, SubAggregatedFeeds } from '../../PriceFeed'
-import { LpToken, ACCOUNT_CHANGED, AccounChanged, oraclePrice } from './lptoken'
+import { LpToken, ACCOUNT_CHANGED, AccountChanged, oraclePrice } from './lptoken'
 
 const DELAY_TIME = 1000
 const STABLE_ORACLE = 'usd:usd'
@@ -34,7 +35,7 @@ export class LpTokenPair {
       trailing: true,
       leading: false
     })
-    this.lpToken.emitter.on(ACCOUNT_CHANGED, (changed: AccounChanged) => {
+    this.lpToken.emitter.on(ACCOUNT_CHANGED, (changed: AccountChanged) => {
       if (this.addresses.includes(changed.address)) {
         generatePriceThrottle()
       }
@@ -47,8 +48,16 @@ export class LpTokenPair {
 
     Object.keys(this.subAggregatedFeeds).forEach(async (name) => {
       const feed = this.subAggregatedFeeds[name];
-      const priceFeed = feed.medians()
-      for await (let price of priceFeed) {
+
+      if(!this.oracles.has(name)) {
+        let agg = await Aggregator.load(feed.deployInfo.aggregators[feed.pair].pubkey)
+        this.oracles.set(name, {
+          price: agg.answer.median.toNumber(),
+          decimals: agg.config.decimals
+        })
+      }
+
+      for await (let price of feed.medians()) {
         this.lpToken.log.debug('sub oracle price ', { price });
         this.oracles.set(name, {
           price: price.value,
@@ -68,7 +77,7 @@ export class LpTokenPair {
     }
     if (!oracle) {
       this.lpToken.log.debug('no oracle price', { pair: this.pair, name: holder.feed.name });
-      throw new Error('no oracle price, it is ok if in warm-up phase')
+      throw new Error(`no oracle price for ${holder.feed.name}, it is ok if in warm-up phase`)
     }
     const liquidity = new BigNumber(tokenAccount.amount.toString())
       .plus(new BigNumber(openOrderAmount))
@@ -116,10 +125,9 @@ export class LpTokenPair {
       
       return new BigNumber(baseAmount).plus(quoteAmount)
     } catch (err) {
-      this.lpToken.log.warn('get total value failed', err);
+      this.lpToken.log.warn('get total value failed', { name: this.pair, err: `${err}`});
       return undefined;
     }
-
   }
 
   generatePrice = () => {

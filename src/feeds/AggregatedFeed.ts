@@ -1,6 +1,7 @@
 import EventEmitter from 'events'
 import { Logger } from 'winston'
-import { FeedSource, SolinkSubmitterConfig } from '../config'
+import { SolinkSubmitterConfig } from '../config'
+import { AggregatorDeployFile } from '../Deployer'
 import { ErrorNotifier } from '../ErrorNotifier'
 import { log } from '../log'
 import { metricOracleFeedPrice } from '../metrics'
@@ -18,6 +19,7 @@ export class AggregatedFeed {
   constructor(
     public feeds: PriceFeed[],
     public pair: string,
+    public deployInfo: AggregatorDeployFile,
     private oracle: string,
     private errorNotifier?: ErrorNotifier,
     private submitterConf?: SolinkSubmitterConfig,

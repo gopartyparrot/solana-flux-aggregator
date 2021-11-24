@@ -63,7 +63,7 @@ export abstract class PriceFeed {
       })
 
       conn.addEventListener('error', err => {
-        this.log.error('ws error', { source: this.source, err })
+        this.log.error('ws error', { source: this.source, err: `${err.message}` })
       })
 
       conn.addEventListener('message', msg => {
