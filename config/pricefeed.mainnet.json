@@ -4,7 +4,7 @@
   "submitter": {
     "sol:usd": {
       "source": ["ftx", "coinbase"],
-      "minValueChangeForNewRound": 70
+      "minValueChangeForNewRound": 10
     },
     "srm:usdt": {
       "source": ["ftx", "binance"],

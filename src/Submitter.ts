@@ -137,7 +137,10 @@ export class Submitter {
 
     // add polling in case onAccountChange stops receiving updates
     setInterval(async () =>  {
-      this.aggregator = await Aggregator.load(this.aggregatorPK)
+      const newAggregator = await Aggregator.load(this.aggregatorPK)
+      if(newAggregator.round.id.gt(this.reportedRound)) {
+        this.aggregator = newAggregator
+      }
       if (this.isRoundReported(this.aggregator.round.id)) {
         return
       }
