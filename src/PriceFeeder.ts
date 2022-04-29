@@ -76,6 +76,8 @@ export class PriceFeeder {
     this.startAccessibleAggregators()
     // Monitor balance for this oracle
     this.startMetricBalance()
+
+    this.startHealthMonitor()
   }
 
   startChainlinkSubmitRequest(aggregatorPK: PublicKey, roundID: BN) {
@@ -258,5 +260,14 @@ export class PriceFeeder {
         account.lamports / 10 ** 9
       )
     })
+  }
+
+  private startHealthMonitor() {
+    // TODO: for now we just exit to force a restart every 6 hours
+    //       later we can add some real health checks
+    setInterval(() => {
+      log.info('exiting oracle after 6 hours...')
+      process.exit(0)
+    }, 21600 * 1000) // 6 hours (21600 mins)
   }
 }
