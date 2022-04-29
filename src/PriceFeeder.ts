@@ -268,6 +268,6 @@ export class PriceFeeder {
     setInterval(() => {
       log.info('exiting oracle after 6 hours...')
       process.exit(0)
-    }, 1800 * 1000) // 6 hours (21600 mins)
+    }, 21600 * 1000) // 6 hours (21600 mins)
   }
 }
