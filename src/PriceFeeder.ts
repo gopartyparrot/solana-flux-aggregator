@@ -265,9 +265,12 @@ export class PriceFeeder {
   private startHealthMonitor() {
     // TODO: for now we just exit to force a restart every 6 hours
     //       later we can add some real health checks
-    setInterval(() => {
-      log.info('exiting oracle after 6 hours...')
-      process.exit(0)
-    }, 21600 * 1000) // 6 hours (21600 mins)
+    const seconds = process.env.RESTART_SECONDS
+    if (seconds) {
+      setInterval(() => {
+        log.info(`exiting oracle after ${seconds} seconds...`)
+        process.exit(0)
+      }, +seconds * 1000)
+    }
   }
 }
