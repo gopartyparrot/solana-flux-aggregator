@@ -456,17 +456,17 @@
       },
       "requesters": {}
     },
-    "ust:usd": {
+    "USTCmQ:usd": {
       "pubkey": {
         "type": "PublicKey",
-        "base58": "92MBsDrRP8cVaAkfJBvGaxwt3c4bkH5ArRYHhfqasZqv"
+        "base58": "27EvmX2X559ZHmnJzubXnyDYvZSRMbCdT12nzu7LVzmq"
       },
       "owner": {
         "type": "PublicKey",
         "base58": "948Bbcg3mUjSVeqeg54QC73BNJgtRdbFevYopDGeaSf6"
       },
       "config": {
-        "description": "ust:usd",
+        "description": "USTCmQ:usd",
         "decimals": 6,
         "roundTimeout": 0,
         "minSubmissions": 1,
@@ -483,7 +483,7 @@
         "mallard": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "HmNY5Zn4r6nkXFecb76vHFQVWBJwXvkKUZmyb2ghPeNQ"
+            "base58": "8WP9cQHqiZsdt12eAfnnRzndKNAhVXUJFqx8hHmxFZ7u"
           },
           "owner": {
             "type": "PublicKey",
@@ -493,7 +493,7 @@
         "goldfinch": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "HjCP1djKRSaMs7sLYdJ6tzqiPcg8bVbWHcu3UjMSjQJP"
+            "base58": "2dVhHJ9QzZrtB84tkLPMPLbe5dPMXZ8veH7n1NNZub3p"
           },
           "owner": {
             "type": "PublicKey",
@@ -503,7 +503,7 @@
         "siskin": {
           "pubkey": {
             "type": "PublicKey",
-            "base58": "5UYdefeuZsMSF9JEhZqXR7HY3ixpouiEkwrErXm6HyWQ"
+            "base58": "3F8hjK4V8QMPLv4wu4FBpQAopd6x3eNoJYRRh6zoGjGs"
           },
           "owner": {
             "type": "PublicKey",

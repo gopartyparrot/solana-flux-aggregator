@@ -111,6 +111,7 @@ interface SolinkLpTokenSubmitterConfig {
 export interface SolinkSubmitterConfig {
   source?: FeedSource[]
   additionalSources?: FeedSource[]
+  tokenMint?: string
   inverse?: boolean
   lpToken?: SolinkLpTokenSubmitterConfig
   serum?: SolinkSerumConfig
@@ -122,6 +123,8 @@ export enum FeedSource {
   COINBASE = "coinbase",
   COINBASE_INVERSE = "coinbase_inverse",
   FTX = "ftx",
+  GOPRICES_1 = "goprices_1",
+  GOPRICES_2 = "goprices_2",
   FTX_INVERSE = 'ftx_inverse',
   BITSTAMP = "bitstamp",
   BINANCE = "binance",

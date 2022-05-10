@@ -1,7 +1,7 @@
 import { PublicKey } from '@solana/web3.js'
 import BN from 'bn.js'
 import { Wallet } from 'solray'
-import { SolinkConfig } from './config'
+import { FeedSource, SolinkConfig } from './config'
 import { conn } from './context'
 import { AggregatorDeployFile } from './Deployer'
 import { ErrorNotifier } from './ErrorNotifier'
@@ -20,6 +20,7 @@ import {
   Serum,
   PriceFeed
 } from './feeds'
+import { GOPrices } from './feeds/sources/goprices'
 import { log } from './log'
 import { metricOracleBalanceSol } from './metrics'
 import { Submitter } from './Submitter'
@@ -47,6 +48,8 @@ export class PriceFeeder {
       new Binance(),
       new BinanceInverse(),
       new Serum(),
+      new GOPrices(FeedSource.GOPRICES_1, "https://price-api.parrot.fi"),
+      new GOPrices(FeedSource.GOPRICES_2, "https://price-api.parrot.fi"),
       new FileSource(5000, this.solinkConfig.priceFileDir || process.cwd())
     ]
   }
