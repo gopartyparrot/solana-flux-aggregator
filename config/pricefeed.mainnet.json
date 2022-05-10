@@ -70,7 +70,7 @@
     "USTCmQ:usd": {
       "source": ["goprices_1", "goprices_2"],
       "tokenMint": "USTCmQpbUGj5iTsXdnTYHZupY1QpftDZhLokSVk6UWi",
-      "minValueChangeForNewRound": 1000
+      "minValueChangeForNewRound": 100
     },
     "default": {
       "source": [],
