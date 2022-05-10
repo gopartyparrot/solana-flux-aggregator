@@ -67,6 +67,10 @@
       "minValueChangeForNewRound": 9,
       "lastUpdateTimeout": 120000
     },
+    "ust:usd": {
+      "source": ["ftx", "binance"],
+      "minValueChangeForNewRound": 1000
+    },
     "default": {
       "source": [],
       "minValueChangeForNewRound": 100
