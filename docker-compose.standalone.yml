@@ -5,6 +5,8 @@ services:
     build: 
       context: .
     restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command: yarn solink oracle
     volumes:
       - ./logs:/app/logs
