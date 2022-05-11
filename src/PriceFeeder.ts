@@ -48,8 +48,7 @@ export class PriceFeeder {
       new Binance(),
       new BinanceInverse(),
       new Serum(),
-      new GOPrices(FeedSource.GOPRICES_1, "https://price-api.parrot.fi"),
-      new GOPrices(FeedSource.GOPRICES_2, "http://45.63.122.49"),
+      new GOPrices(process.env.GOPRICES_HOST || ''),
       new FileSource(5000, this.solinkConfig.priceFileDir || process.cwd())
     ]
   }

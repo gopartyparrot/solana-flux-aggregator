@@ -68,8 +68,13 @@
       "lastUpdateTimeout": 120000
     },
     "USTCmQ:usd": {
-      "source": ["goprices_1", "goprices_2"],
+      "source": ["goprices"],
       "tokenMint": "USTCmQpbUGj5iTsXdnTYHZupY1QpftDZhLokSVk6UWi",
+      "minValueChangeForNewRound": 100
+    },
+    "yUT3Dq:usd": {
+      "source": ["goprices"],
+      "tokenMint": "yUT3Dqe2Nz46iy9urmqEdntQSBywvSC1KoiktkEycvN",
       "minValueChangeForNewRound": 100
     },
     "default": {

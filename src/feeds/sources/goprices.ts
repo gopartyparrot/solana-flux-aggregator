@@ -7,13 +7,11 @@ import BigNumber from 'bignumber.js'
 export class GOPrices extends PriceFeed {
   // go prices feed must have 6 decimals
   public decimals = 6
+  public source = FeedSource.GOPRICES
   protected log = log.child({ class: this.source })
   protected baseurl = ''
 
-  constructor(
-    public source: FeedSource.GOPRICES_1 | FeedSource.GOPRICES_2,
-    private priceURL: string
-  ) {
+  constructor(private priceURL: string) {
     super()
   }
 
@@ -63,6 +61,10 @@ export class GOPrices extends PriceFeed {
   }
 
   async fetchPrice(pair: string, mint: string) {
+    if (!this.priceURL) {
+      this.log.debug('go prices url not set', { mint })
+      return
+    }
     this.log.debug('go prices fetch', { mint })
     const { data } = await axios.get(`${this.priceURL}/api/valuations/${mint}`)
 
