@@ -80,12 +80,12 @@
     "usdt:usd": {
       "source": ["goprices"],
       "tokenMint": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-      "minValueChangeForNewRound": 100
+      "minValueChangeForNewRound": 500
     },
     "y2poav:usd": {
       "source": ["goprices"],
       "tokenMint": "y2poavXfuAHWRizzK52vegqzzkHUo5CzooxFzDDX6vp",
-      "minValueChangeForNewRound": 100
+      "minValueChangeForNewRound": 500
     },
     "default": {
       "source": [],
