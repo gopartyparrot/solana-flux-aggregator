@@ -22,6 +22,11 @@
         "source": ["coinbase_inverse", "binance_inverse"],
         "minValueChangeForNewRound": 500
       },
+      "UST32f:usd": {
+        "source": ["goprices"],
+        "tokenMint": "UST32f2JtPGocLzsL41B3VBBoJzTm1mK1j3rwyM3Wgc",
+        "minValueChangeForNewRound": 100
+      },
       "default": {
         "source": [],
         "minValueChangeForNewRound": 100

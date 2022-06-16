@@ -77,6 +77,21 @@
       "tokenMint": "yUT3Dqe2Nz46iy9urmqEdntQSBywvSC1KoiktkEycvN",
       "minValueChangeForNewRound": 100
     },
+    "usdt:usd": {
+      "source": ["goprices"],
+      "tokenMint": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+      "minValueChangeForNewRound": 150
+    },
+    "y2poav:usd": {
+      "source": ["goprices"],
+      "tokenMint": "y2poavXfuAHWRizzK52vegqzzkHUo5CzooxFzDDX6vp",
+      "minValueChangeForNewRound": 150
+    },
+    "2poo1w:usd": {
+      "source": ["goprices"],
+      "tokenMint": "2poo1w1DL6yd2WNTCnNTzDqkC6MBXq7axo77P16yrBuf",
+      "minValueChangeForNewRound": 150
+    },
     "default": {
       "source": [],
       "minValueChangeForNewRound": 100
