@@ -7,14 +7,16 @@ import { log } from '../../../log'
 import { conn as web3Conn } from '../../../context'
 import { IPrice, PriceFeed, SubAggregatedFeeds } from '../../PriceFeed'
 import { LpTokenPair } from './lpTokenPair'
-import {
-  BNu64,
-  MINT_LAYOUT,
-  TOKEN_ACCOUNT_LAYOUT,
-  getAmmLayout
-} from './layout'
+import { getAmmLayout } from './layout'
 import { struct } from 'buffer-layout'
 import { getMultipleAccounts, sleep } from '../../../utils'
+
+import {
+  RawAccount as TokenAccount,
+  MintLayout,
+  AccountLayout,
+  RawMint as MintInfo
+} from '@solana/spl-token'
 
 export const ACCOUNT_CHANGED = 'ACCOUNT_CHANGED'
 
@@ -23,14 +25,6 @@ export interface oraclePrice {
   decimals: number
 }
 
-export type TokenAccount = {
-  amount: BNu64
-}
-
-export type MintInfo = {
-  supply: BNu64
-  decimals: number
-}
 export interface AccountChanged {
   address: string
 }
@@ -104,7 +98,7 @@ export class LpToken extends PriceFeed {
   ) {
     const info = decodeMintInfo(accountInfo.data)
     this.lpTokenAccounts.set(address, info)
-    this.log.debug('subscription update lptoken', {
+    this.log.debug('subscription update lptoken mint', {
       address,
       supply: info.supply.toString()
     })
@@ -114,7 +108,7 @@ export class LpToken extends PriceFeed {
     address: string,
     accountInfo: AccountInfo<Buffer>
   ) {
-    const info = decodeAccountTokenInfo(accountInfo.data)
+    const info = AccountLayout.decode(accountInfo.data)
     this.holderAccounts.set(address, info)
     this.log.debug('subscription update holder balance', {
       address,
@@ -312,15 +306,9 @@ export class LpToken extends PriceFeed {
   }
 }
 
-function decodeAccountTokenInfo(data: Buffer): TokenAccount {
-  const accountInfo = TOKEN_ACCOUNT_LAYOUT.decode(data)
-  accountInfo.amount = BNu64.fromBuffer(accountInfo.amount)
-  return accountInfo
-}
-
 function decodeMintInfo(data: Buffer): MintInfo {
-  const info = MINT_LAYOUT.decode(data)
-  info.supply = BNu64.fromBuffer(info.supply)
+  const info = MintLayout.decode(data)
+  info.supply = info.supply
   info.decimals = info.decimals
   return info
 }
