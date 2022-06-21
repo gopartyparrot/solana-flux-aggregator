@@ -463,7 +463,7 @@
       },
       "owner": {
         "type": "PublicKey",
-        "base58": "948Bbcg3mUjSVeqeg54QC73BNJgtRdbFevYopDGeaSf6"
+        "base58": "5jwBGfXVpcEY9Hqmw2hCu77NMnoMeVKzgKCChf82d1Te"
       },
       "config": {
         "description": "USTCmQ:usd",
@@ -520,7 +520,7 @@
       },
       "owner": {
         "type": "PublicKey",
-        "base58": "948Bbcg3mUjSVeqeg54QC73BNJgtRdbFevYopDGeaSf6"
+        "base58": "5jwBGfXVpcEY9Hqmw2hCu77NMnoMeVKzgKCChf82d1Te"
       },
       "config": {
         "description": "yUT3Dq:usd",
@@ -577,7 +577,7 @@
       },
       "owner": {
         "type": "PublicKey",
-        "base58": "948Bbcg3mUjSVeqeg54QC73BNJgtRdbFevYopDGeaSf6"
+        "base58": "5jwBGfXVpcEY9Hqmw2hCu77NMnoMeVKzgKCChf82d1Te"
       },
       "config": {
         "description": "UST32f:usd",
@@ -634,7 +634,7 @@
       },
       "owner": {
         "type": "PublicKey",
-        "base58": "948Bbcg3mUjSVeqeg54QC73BNJgtRdbFevYopDGeaSf6"
+        "base58": "5jwBGfXVpcEY9Hqmw2hCu77NMnoMeVKzgKCChf82d1Te"
       },
       "config": {
         "description": "usdt:usd",
@@ -691,7 +691,7 @@
       },
       "owner": {
         "type": "PublicKey",
-        "base58": "948Bbcg3mUjSVeqeg54QC73BNJgtRdbFevYopDGeaSf6"
+        "base58": "5jwBGfXVpcEY9Hqmw2hCu77NMnoMeVKzgKCChf82d1Te"
       },
       "config": {
         "description": "y2poav:usd",
@@ -748,7 +748,7 @@
       },
       "owner": {
         "type": "PublicKey",
-        "base58": "948Bbcg3mUjSVeqeg54QC73BNJgtRdbFevYopDGeaSf6"
+        "base58": "5jwBGfXVpcEY9Hqmw2hCu77NMnoMeVKzgKCChf82d1Te"
       },
       "config": {
         "description": "2poo1w:usd",
