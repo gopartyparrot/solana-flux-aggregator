@@ -49,24 +49,29 @@ export class GOPrices extends PriceFeed {
       return
     }
     const mint = config.tokenMint
+    // by default is USDC dollar mint
+    const priceMint = config.priceMint ?? ''
 
     this.pairs.push(pair)
 
-    this.fetchPrice(pair, mint)
+    this.fetchPrice(pair, mint, priceMint)
     setInterval(() => {
-      this.fetchPrice(pair, mint).catch(error => {
+      this.fetchPrice(pair, mint, priceMint).catch(error => {
         this.log.error('go prices error', { pair, error: `${error}` })
       })
     }, 60_000)
   }
 
-  async fetchPrice(pair: string, mint: string) {
+  async fetchPrice(pair: string, mint: string, priceMint: string) {
     if (!this.priceURL) {
-      this.log.debug('go prices url not set', { mint })
+      this.log.debug('go prices url not set', { mint, priceMint })
       return
     }
-    this.log.debug('go prices fetch', { mint })
-    const { data } = await axios.get(`${this.priceURL}/api/valuations/${mint}`)
+    this.log.debug('go prices fetch', { mint, priceMint })
+    const priceMintPath = priceMint ? `/${priceMint}` : ''
+    const { data } = await axios.get(
+      `${this.priceURL}/api/valuations/${mint}${priceMintPath}`
+    )
 
     const price: IPrice = {
       source: this.source,

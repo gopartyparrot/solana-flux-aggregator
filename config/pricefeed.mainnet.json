@@ -92,6 +92,12 @@
       "tokenMint": "2poo1w1DL6yd2WNTCnNTzDqkC6MBXq7axo77P16yrBuf",
       "minValueChangeForNewRound": 150
     },
+    "SoLEao:sol": {
+      "source": ["goprices"],
+      "tokenMint": "SoLEao8wTzSfqhuou8rcYsVoLjthVmiXuEjzdNPMnCz",
+      "priceMint": "So11111111111111111111111111111111111111112",
+      "minValueChangeForNewRound": 1000
+    },
     "default": {
       "source": [],
       "minValueChangeForNewRound": 100

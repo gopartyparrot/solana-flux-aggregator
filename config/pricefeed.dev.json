@@ -27,6 +27,23 @@
         "tokenMint": "UST32f2JtPGocLzsL41B3VBBoJzTm1mK1j3rwyM3Wgc",
         "minValueChangeForNewRound": 100
       },
+      "PrsVdK:sol": {
+        "source": ["goprices"],
+        "tokenMint": "PrsVdKtXDDf6kJQu5Ff6YqmjfE4TZXtBgHM4bjuvRnR",
+        "priceMint": "So11111111111111111111111111111111111111112",
+        "minValueChangeForNewRound": 1000
+      },
+      "SoLEao:sol": {
+        "source": ["goprices"],
+        "tokenMint": "SoLEao8wTzSfqhuou8rcYsVoLjthVmiXuEjzdNPMnCz",
+        "priceMint": "So11111111111111111111111111111111111111112",
+        "minValueChangeForNewRound": 1000
+      },
+      "GHhDU9:usd": {
+        "source": ["goprices"],
+        "tokenMint": "GHhDU9Y7HM37v6cQyaie1A3aZdfpCDp6ScJ5zZn2c3uk",
+        "minValueChangeForNewRound": 1000
+      },
       "default": {
         "source": [],
         "minValueChangeForNewRound": 100
