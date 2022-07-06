@@ -95,7 +95,7 @@
     "SoLEao:sol": {
       "source": ["goprices"],
       "tokenMint": "SoLEao8wTzSfqhuou8rcYsVoLjthVmiXuEjzdNPMnCz",
-      "priceMint": "So11111111111111111111111111111111111111112",
+      "relativeTo": "So11111111111111111111111111111111111111112",
       "minValueChangeForNewRound": 1000
     },
     "default": {

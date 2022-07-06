@@ -30,13 +30,13 @@
       "PrsVdK:sol": {
         "source": ["goprices"],
         "tokenMint": "PrsVdKtXDDf6kJQu5Ff6YqmjfE4TZXtBgHM4bjuvRnR",
-        "priceMint": "So11111111111111111111111111111111111111112",
+        "relativeTo": "So11111111111111111111111111111111111111112",
         "minValueChangeForNewRound": 1000
       },
       "SoLEao:sol": {
         "source": ["goprices"],
         "tokenMint": "SoLEao8wTzSfqhuou8rcYsVoLjthVmiXuEjzdNPMnCz",
-        "priceMint": "So11111111111111111111111111111111111111112",
+        "relativeTo": "So11111111111111111111111111111111111111112",
         "minValueChangeForNewRound": 1000
       },
       "GHhDU9:usd": {

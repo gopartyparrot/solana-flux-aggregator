@@ -49,35 +49,36 @@ export class GOPrices extends PriceFeed {
       return
     }
     const mint = config.tokenMint
-    // by default is USDC dollar mint
-    const priceMint = config.priceMint ?? ''
+    const relativeTo = config.relativeTo ?? ''
 
     this.pairs.push(pair)
 
-    this.fetchPrice(pair, mint, priceMint)
+    this.fetchPrice(pair, mint, relativeTo)
     setInterval(() => {
-      this.fetchPrice(pair, mint, priceMint).catch(error => {
+      this.fetchPrice(pair, mint, relativeTo).catch(error => {
         this.log.error('go prices error', { pair, error: `${error}` })
       })
     }, 60_000)
   }
 
-  async fetchPrice(pair: string, mint: string, priceMint: string) {
+  async fetchPrice(pair: string, mint: string, relativeTo: string) {
     if (!this.priceURL) {
-      this.log.debug('go prices url not set', { mint, priceMint })
+      this.log.debug('go prices url not set', { mint })
       return
     }
-    this.log.debug('go prices fetch', { mint, priceMint })
-    const priceMintPath = priceMint ? `/${priceMint}` : ''
-    const { data } = await axios.get(
-      `${this.priceURL}/api/valuations/${mint}${priceMintPath}`
-    )
+    this.log.debug('go prices fetch', { mint })
+    const { data } = await axios.get(`${this.priceURL}/api/valuations/${mint}`)
+
+    let value = this.parsePrice(data.dollar)
+    if (relativeTo) {
+      value = this.parsePrice(data.relative[relativeTo])
+    }
 
     const price: IPrice = {
       source: this.source,
       pair,
       decimals: this.decimals,
-      value: this.parsePrice(data.dollar),
+      value,
       time: Date.now()
     }
     this.onMessage(price)

@@ -110,7 +110,7 @@ export interface SolinkSubmitterConfig {
   source?: FeedSource[]
   additionalSources?: FeedSource[]
   tokenMint?: string
-  priceMint?: string
+  relativeTo?: string
   inverse?: boolean
   lpToken?: SolinkLpTokenSubmitterConfig
   serum?: SolinkSerumConfig
