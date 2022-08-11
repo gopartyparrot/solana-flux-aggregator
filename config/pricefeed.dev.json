@@ -27,6 +27,16 @@
         "tokenMint": "UST32f2JtPGocLzsL41B3VBBoJzTm1mK1j3rwyM3Wgc",
         "minValueChangeForNewRound": 100
       },
+      "USTCmQ:usd": {
+        "source": ["goprices"],
+        "tokenMint": "USTCmQpbUGj5iTsXdnTYHZupY1QpftDZhLokSVk6UWi",
+        "minValueChangeForNewRound": 100
+      },
+      "yUT3Dq:usd": {
+        "source": ["goprices"],
+        "tokenMint": "yUT3Dqe2Nz46iy9urmqEdntQSBywvSC1KoiktkEycvN",
+        "minValueChangeForNewRound": 100
+      },
       "PrsVdK:sol": {
         "source": ["goprices"],
         "tokenMint": "PrsVdKtXDDf6kJQu5Ff6YqmjfE4TZXtBgHM4bjuvRnR",
