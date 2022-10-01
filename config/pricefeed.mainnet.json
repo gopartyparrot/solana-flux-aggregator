@@ -8,7 +8,7 @@
     },
     "srm:usdt": {
       "source": ["ftx", "binance"],
-      "minValueChangeForNewRound": 2
+      "minValueChangeForNewRound": 1
     },
     "usdc:btc": {
       "source": ["coinbase_inverse", "binance_inverse"],

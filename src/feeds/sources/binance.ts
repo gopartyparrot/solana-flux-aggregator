@@ -34,6 +34,8 @@ export class Binance extends PriceFeed {
     const quoteCurrency = payload.s.slice(3).toLowerCase()
     let pair = `${baseCurrency}:${quoteCurrency}`
 
+    pair = pair.replace("usdc", "busd")
+
     if (this.source === FeedSource.BINANCE_INVERSE) {
       pair = pair.split(':').reverse().join(':')
     }
