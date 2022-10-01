@@ -34,8 +34,6 @@ export class Binance extends PriceFeed {
     const quoteCurrency = payload.s.slice(3).toLowerCase()
     let pair = `${baseCurrency}:${quoteCurrency}`
 
-    pair = pair.replace("usdc", "busd")
-
     if (this.source === FeedSource.BINANCE_INVERSE) {
       pair = pair.split(':').reverse().join(':')
     }
@@ -57,8 +55,11 @@ export class Binance extends PriceFeed {
 
   async handleSubscribe(pair: string) {
     // "btc:usd" => "btcbusd"
+    // consider BUSD as USDC
+    pair = pair.replace("usdc", "busd")
     const [baseCurrency, quoteCurrency] = pair.split(':')
-    const targetPair = `${baseCurrency}${quoteCurrency}@trade`.toLowerCase()
+    let targetPair = `${baseCurrency}${quoteCurrency}@trade`.toLowerCase()
+
     this.conn.send(
       JSON.stringify({
         method: 'SUBSCRIBE',
