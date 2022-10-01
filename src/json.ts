@@ -1,51 +1,64 @@
-import { PublicKey } from "solray"
-import fs from "fs"
-import BN from "bn.js"
+import { PublicKey } from '@solana/web3.js'
+import fs from 'fs'
+import BN from 'bn.js'
 
 export function jsonReviver(_key: string, val: any) {
-  if (val && typeof val == "object") {
-    if (val["type"] == "PublicKey") {
+  if (val && typeof val == 'object') {
+    if (val['type'] == 'PublicKey') {
       return new PublicKey(val.base58)
     }
 
-    if (val["type"] == "Buffer") {
-      return Buffer.from(val.hex, "hex")
+    if (val['type'] == 'Buffer') {
+      return Buffer.from(val.hex, 'hex')
     }
   }
   return val
 }
 
-export function jsonReplacer(key: string, value: any) {
-  if (value && typeof value == "object") {
-    if (value.constructor == PublicKey) {
-      return {
-        type: "PublicKey",
-        base58: value.toBase58(),
-      }
-    }
+const toJSONModifiers = {
+  PublicKey: (instance: PublicKey) => ({
+    type: 'PublicKey',
+    base58: instance.toBase58()
+  }),
+  BN: (instance: BN) => ({
+    type: 'BN',
+    data: instance.toString()
+  }),
+  Buffer: (instance: Buffer) => ({
+    type: 'Buffer',
+    data: instance.toString('hex')
+  })
+}
 
-    // The Buffer class defines a `toJSON` method that returns:
-    //
-    // {
-    //   type: 'Buffer',
-    //   data: [
-    //     100, 101, 97, 100,
-    //      98, 101, 97, 102
-    //   ]
-    // }
-    //
-    // Convert this to an hex string
-    if (value.type == "Buffer") {
-      return {
-        type: "Buffer",
-        hex: Buffer.from(value).toString("hex"),
-      }
-    }
+function formatObj(obj: any): any {
+  if (obj == null) {
+    return obj
   }
 
-  return value
+  if (Array.isArray(obj)) {
+    return Array.prototype.map.call(obj, element => formatObj(element))
+  }
+
+  if (typeof obj == 'object') {
+    const modifier = toJSONModifiers[obj.constructor.name]
+    if (!!modifier) {
+      return modifier(obj)
+    }
+    let newobj: any = {}
+    for (let tuple of Object.entries(obj)) {
+      let [k, v]: [string, any] = tuple
+      newobj[k] = formatObj(v)
+    }
+
+    return newobj
+  }
+  return obj
+}
+
+export function jsonReplacer(key: string, value: any) {
+  return formatObj(value)
 }
 
 export function loadJSONFile<T>(file: string): T {
-  return JSON.parse(fs.readFileSync(file, "utf8"), jsonReviver)
+  return JSON.parse(fs.readFileSync(file, 'utf8'), jsonReviver)
 }

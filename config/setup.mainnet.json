@@ -209,6 +209,51 @@
         "goldfinch",
         "siskin"
       ]
+    },
+    "PrsVdK:sol": {
+      "decimals": 6,
+      "minSubmissions": 1,
+      "maxSubmissions": 13,
+      "roundTimeout": 0,
+      "restartDelay": 0,
+      "requesterRestartDelay": 0,
+      "rewardAmount": 10000,
+      "rewardTokenAccount": "3oLHHTaRqNsuTMjsTtkVy8bock6Bx8gCmDxku4TurVj1",
+      "oracles": [
+        "mallard",
+        "goldfinch",
+        "siskin"
+      ]
+    },
+    "SoLEao:sol": {
+      "decimals": 6,
+      "minSubmissions": 1,
+      "maxSubmissions": 13,
+      "roundTimeout": 0,
+      "restartDelay": 0,
+      "requesterRestartDelay": 0,
+      "rewardAmount": 10000,
+      "rewardTokenAccount": "3oLHHTaRqNsuTMjsTtkVy8bock6Bx8gCmDxku4TurVj1",
+      "oracles": [
+        "mallard",
+        "goldfinch",
+        "siskin"
+      ]
+    },
+    "GHhDU9:usd": {
+      "decimals": 4,
+      "minSubmissions": 1,
+      "maxSubmissions": 13,
+      "roundTimeout": 0,
+      "restartDelay": 0,
+      "requesterRestartDelay": 0,
+      "rewardAmount": 10000,
+      "rewardTokenAccount": "3oLHHTaRqNsuTMjsTtkVy8bock6Bx8gCmDxku4TurVj1",
+      "oracles": [
+        "mallard",
+        "goldfinch",
+        "siskin"
+      ]
     }
   },
   "oracles": {

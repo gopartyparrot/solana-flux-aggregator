@@ -8,11 +8,11 @@
     },
     "srm:usdt": {
       "source": ["ftx", "binance"],
-      "minValueChangeForNewRound": 2
+      "minValueChangeForNewRound": 1
     },
     "usdc:btc": {
       "source": ["coinbase_inverse", "binance_inverse"],
-      "minValueChangeForNewRound": 25
+      "minValueChangeForNewRound": 100
     },
     "btc:usd": {
       "source": ["ftx", "coinbase"],
@@ -64,18 +64,8 @@
           }
         }
       },
-      "minValueChangeForNewRound": 9,
+      "minValueChangeForNewRound": 19,
       "lastUpdateTimeout": 120000
-    },
-    "USTCmQ:usd": {
-      "source": ["goprices"],
-      "tokenMint": "USTCmQpbUGj5iTsXdnTYHZupY1QpftDZhLokSVk6UWi",
-      "minValueChangeForNewRound": 100
-    },
-    "yUT3Dq:usd": {
-      "source": ["goprices"],
-      "tokenMint": "yUT3Dqe2Nz46iy9urmqEdntQSBywvSC1KoiktkEycvN",
-      "minValueChangeForNewRound": 100
     },
     "usdt:usd": {
       "source": ["goprices"],
@@ -91,6 +81,12 @@
       "source": ["goprices"],
       "tokenMint": "2poo1w1DL6yd2WNTCnNTzDqkC6MBXq7axo77P16yrBuf",
       "minValueChangeForNewRound": 150
+    },
+    "SoLEao:sol": {
+      "source": ["goprices"],
+      "tokenMint": "SoLEao8wTzSfqhuou8rcYsVoLjthVmiXuEjzdNPMnCz",
+      "relativeTo": "So11111111111111111111111111111111111111112",
+      "minValueChangeForNewRound": 500
     },
     "default": {
       "source": [],

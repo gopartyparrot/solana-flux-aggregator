@@ -38,6 +38,9 @@ export class Binance extends PriceFeed {
       pair = pair.split(':').reverse().join(':')
     }
 
+    // relace back the busd to usdc to allow matching pair name
+    pair = pair.replace("busd", "usdc")
+
     const price: IPrice = {
       source: this.source,
       pair,
@@ -55,8 +58,13 @@ export class Binance extends PriceFeed {
 
   async handleSubscribe(pair: string) {
     // "btc:usd" => "btcbusd"
+
+    // Binance do not have USDC anymore, replace it to BUSD
+    pair = pair.replace("usdc", "busd")
+
     const [baseCurrency, quoteCurrency] = pair.split(':')
-    const targetPair = `${baseCurrency}${quoteCurrency}@trade`.toLowerCase()
+    let targetPair = `${baseCurrency}${quoteCurrency}@trade`.toLowerCase()
+
     this.conn.send(
       JSON.stringify({
         method: 'SUBSCRIBE',
