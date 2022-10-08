@@ -38,24 +38,29 @@ export class CoinBase extends PriceFeed {
 
     if (this.source === FeedSource.COINBASE_INVERSE) {
       pair = pair.split(':').reverse().join(':')
+      // replace back the busd to usdc to allow matching pair name
+      pair = pair.replace("usd", "usdc")
     }
 
     const price: IPrice = {
       source: this.source,
       pair,
       decimals: this.decimals,
-      value:this.parsePrice(payload.price),
+      value: this.parsePrice(payload.price),
       time: Date.now()
     }
-    
+
     return price
   }
 
-  parsePrice(price: number) {    
-    return Math.floor(price * 100);
+  parsePrice(price: number) {
+    return Math.floor(price * 100)
   }
 
   async handleSubscribe(pair: string) {
+    // Coinbase do not have anymore USDC pairs, everything is USD
+    pair = pair.replace('usdc', 'usd')
+
     // "btc:usd" => "BTC-USD"
     const targetPair = pair.replace(':', '-').toUpperCase()
 
@@ -69,13 +74,12 @@ export class CoinBase extends PriceFeed {
   }
 }
 
-
 export class CoinBaseInverse extends CoinBase {
   public source = FeedSource.COINBASE_INVERSE
   public decimals = 10
 
-  parsePrice(price: number) {    
-    return Math.floor(1 * 10 ** this.decimals / price)
+  parsePrice(price: number) {
+    return Math.floor((1 * 10 ** this.decimals) / price)
   }
 
   async handleSubscribe(pair: string) {
