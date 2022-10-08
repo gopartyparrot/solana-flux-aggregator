@@ -4,7 +4,7 @@ import { IPrice, PriceFeed } from '../PriceFeed'
 
 export class Binance extends PriceFeed {
   public source = FeedSource.BINANCE
-  public decimals = 2;
+  public decimals = 2
   protected log = log.child({ class: this.source })
   protected baseurl = 'wss://stream.binance.com/ws'
 
@@ -38,8 +38,8 @@ export class Binance extends PriceFeed {
       pair = pair.split(':').reverse().join(':')
     }
 
-    // relace back the busd to usdc to allow matching pair name
-    pair = pair.replace("busd", "usdc")
+    // replace back the busd to usdc to allow matching pair name
+    pair = pair.replace('busd', 'usdc')
 
     const price: IPrice = {
       source: this.source,
@@ -53,17 +53,16 @@ export class Binance extends PriceFeed {
   }
 
   parsePrice(price: number) {
-    return Math.floor(price * 100);
+    return Math.floor(price * 100)
   }
 
   async handleSubscribe(pair: string) {
-    // "btc:usd" => "btcbusd"
-
     // Binance do not have USDC anymore, replace it to BUSD
-    pair = pair.replace("usdc", "busd")
+    pair = pair.replace('usdc', 'busd')
 
+    // "btc:usd" => "btcbusd"
     const [baseCurrency, quoteCurrency] = pair.split(':')
-    let targetPair = `${baseCurrency}${quoteCurrency}@trade`.toLowerCase()
+    const targetPair = `${baseCurrency}${quoteCurrency}@trade`.toLowerCase()
 
     this.conn.send(
       JSON.stringify({
@@ -75,13 +74,12 @@ export class Binance extends PriceFeed {
   }
 }
 
-
 export class BinanceInverse extends Binance {
   public source = FeedSource.BINANCE_INVERSE
-  public decimals = 10;
+  public decimals = 10
 
   parsePrice(price: number) {
-    return Math.floor(1 * 10 ** this.decimals / price)
+    return Math.floor((1 * 10 ** this.decimals) / price)
   }
 
   async handleSubscribe(pair: string) {
