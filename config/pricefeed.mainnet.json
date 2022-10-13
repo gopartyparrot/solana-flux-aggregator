@@ -53,19 +53,9 @@
       }
     },
     "prt:usd": {
-      "source": ["serum"],
-      "additionalSources": ["ftx", "coinbase"],
-      "serum": {
-        "marketAddress": "H7ZmXKqEx1T8CTM4EMyqR5zyz4e4vUpWTTbCmYmzxmeW",
-        "feed": {
-          "name": "sol:usd",
-          "config": {
-            "source": ["ftx", "coinbase"]
-          }
-        }
-      },
-      "minValueChangeForNewRound": 19,
-      "lastUpdateTimeout": 120000
+      "source": ["goprices"],
+      "tokenMint": "PRT88RkA4Kg5z7pKnezeNH4mafTvtQdfFgpQTGRjz44",
+      "minValueChangeForNewRound": 19
     },
     "usdt:usd": {
       "source": ["goprices"],
