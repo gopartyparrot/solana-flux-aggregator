@@ -111,6 +111,7 @@ export interface SolinkSubmitterConfig {
   additionalSources?: FeedSource[]
   tokenMint?: string
   relativeTo?: string
+  useEwma?: boolean
   inverse?: boolean
   lpToken?: SolinkLpTokenSubmitterConfig
   serum?: SolinkSerumConfig

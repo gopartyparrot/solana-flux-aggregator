@@ -2,26 +2,18 @@
   "_description": "configure witch feeds to use for pair, and other param",
   "priceFileDir": "./config/prices",
   "submitter": {
-    "sol:usd": {
-      "source": ["ftx", "coinbase"],
-      "minValueChangeForNewRound": 10
-    },
-    "srm:usdt": {
-      "source": ["ftx", "binance"],
-      "minValueChangeForNewRound": 1
-    },
     "usdc:btc": {
       "source": ["coinbase_inverse", "binance_inverse"],
-      "minValueChangeForNewRound": 100
+      "minValueChangeForNewRound": 5000
     },
-    "btc:usd": {
-      "source": ["ftx", "coinbase"],
-      "minValueChangeForNewRound": 600
+    "sol:usd": {
+      "source": ["binance", "coinbase"],
+      "minValueChangeForNewRound": 10
     },
     "lptoken_ray_sol_usdc:usd": {
       "source": ["lptoken"],
-      "minValueChangeForNewRound": 70,
-      "additionalSources": ["ftx", "coinbase"],
+      "minValueChangeForNewRound": 50,
+      "additionalSources": ["binance", "coinbase"],
       "lpToken": {
         "lpTokenAddress": "8HoQnePLqPj4M7PUDzfw8e3Ymdwgc7NLGnaTUapubyvu",
         "decimals": 2,
@@ -36,7 +28,7 @@
             "feed": {
               "name": "sol:usd",
               "config": {
-                "source": ["ftx", "coinbase"]
+                "source": ["binance", "coinbase"]
               }
             },
             "decimals": 9
@@ -56,11 +48,6 @@
       "source": ["goprices"],
       "tokenMint": "PRT88RkA4Kg5z7pKnezeNH4mafTvtQdfFgpQTGRjz44",
       "minValueChangeForNewRound": 19
-    },
-    "usdt:usd": {
-      "source": ["goprices"],
-      "tokenMint": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
-      "minValueChangeForNewRound": 150
     },
     "y2poav:usd": {
       "source": ["goprices"],
