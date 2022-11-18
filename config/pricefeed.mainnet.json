@@ -4,7 +4,7 @@
   "submitter": {
     "usdc:btc": {
       "source": ["coinbase_inverse", "binance_inverse"],
-      "minValueChangeForNewRound": 100
+      "minValueChangeForNewRound": 1000
     },
     "lptoken_ray_sol_usdc:usd": {
       "source": ["lptoken"],
