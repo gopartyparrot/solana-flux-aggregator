@@ -1,0 +1,33 @@
+{
+  "_description": "configure witch feeds to use for pair, and other param",
+  "priceFileDir": "./config/prices",
+  "submitter": {
+    "sol:usd": {
+      "source": ["ftx", "coinbase"],
+      "minValueChangeForNewRound": 10
+    },
+    "srm:usdt": {
+      "source": ["ftx", "binance"],
+      "minValueChangeForNewRound": 1
+    },
+    "btc:usd": {
+      "source": ["ftx", "coinbase"],
+      "minValueChangeForNewRound": 600
+    },
+    "usdt:usd": {
+      "source": ["goprices"],
+      "tokenMint": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+      "minValueChangeForNewRound": 150
+    },
+    "soiBTC:btc": {
+      "source": ["goprices"],
+      "tokenMint": "soiBTCBTCQRACLE1111111111111111111111111111",
+      "useEwma": true,
+      "minValueChangeForNewRound": 1000
+    },
+    "default": {
+      "source": [],
+      "minValueChangeForNewRound": 100
+    }
+  }
+}

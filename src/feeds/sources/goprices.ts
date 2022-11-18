@@ -50,18 +50,24 @@ export class GOPrices extends PriceFeed {
     }
     const mint = config.tokenMint
     const relativeTo = config.relativeTo ?? ''
+    const useEwma = config.useEwma ?? false
 
     this.pairs.push(pair)
 
-    this.fetchPrice(pair, mint, relativeTo)
+    this.fetchPrice(pair, mint, relativeTo, useEwma)
     setInterval(() => {
-      this.fetchPrice(pair, mint, relativeTo).catch(error => {
+      this.fetchPrice(pair, mint, relativeTo, useEwma).catch(error => {
         this.log.error('go prices error', { pair, error: `${error}` })
       })
     }, 60_000)
   }
 
-  async fetchPrice(pair: string, mint: string, relativeTo: string) {
+  async fetchPrice(
+    pair: string,
+    mint: string,
+    relativeTo: string,
+    useEwma: boolean
+  ) {
     if (!this.priceURL) {
       this.log.debug('go prices url not set', { mint })
       return
@@ -72,6 +78,9 @@ export class GOPrices extends PriceFeed {
     let value = this.parsePrice(data.dollar)
     if (relativeTo) {
       value = this.parsePrice(data.relative[relativeTo])
+    }
+    if (useEwma) {
+      value = this.parsePrice(data.ewma)
     }
 
     const price: IPrice = {
