@@ -3,17 +3,19 @@
   "priceFileDir": "./config/prices",
   "submitter": {
     "usdc:btc": {
-      "source": ["coinbase_inverse", "binance_inverse"],
-      "minValueChangeForNewRound": 5000
+      "source": [ "goprices", "coinbase_inverse"],
+      "priceMint": "invBTCQRACLE1111111111111111111111111111111",
+      "minValueChangeForNewRound": 1000
     },
     "sol:usd": {
-      "source": ["binance", "coinbase"],
+      "source": ["goprices", "coinbase"],
+      "priceMint": "SoLUSDQRACLE1111111111111111111111111111111",
       "minValueChangeForNewRound": 10
     },
     "lptoken_ray_sol_usdc:usd": {
       "source": ["lptoken"],
       "minValueChangeForNewRound": 50,
-      "additionalSources": ["binance", "coinbase"],
+      "additionalSources": ["goprices", "coinbase"],
       "lpToken": {
         "lpTokenAddress": "8HoQnePLqPj4M7PUDzfw8e3Ymdwgc7NLGnaTUapubyvu",
         "decimals": 2,
@@ -28,7 +30,8 @@
             "feed": {
               "name": "sol:usd",
               "config": {
-                "source": ["binance", "coinbase"]
+                "source": ["goprices", "coinbase"],
+                "priceMint": "SoLUSDQRACLE1111111111111111111111111111111"
               }
             },
             "decimals": 9
@@ -46,22 +49,22 @@
     },
     "prt:usd": {
       "source": ["goprices"],
-      "tokenMint": "PRT88RkA4Kg5z7pKnezeNH4mafTvtQdfFgpQTGRjz44",
+      "priceMint": "PRT88RkA4Kg5z7pKnezeNH4mafTvtQdfFgpQTGRjz44",
       "minValueChangeForNewRound": 19
     },
     "y2poav:usd": {
       "source": ["goprices"],
-      "tokenMint": "y2poavXfuAHWRizzK52vegqzzkHUo5CzooxFzDDX6vp",
+      "priceMint": "y2poavXfuAHWRizzK52vegqzzkHUo5CzooxFzDDX6vp",
       "minValueChangeForNewRound": 150
     },
     "2poo1w:usd": {
       "source": ["goprices"],
-      "tokenMint": "2poo1w1DL6yd2WNTCnNTzDqkC6MBXq7axo77P16yrBuf",
+      "priceMint": "2poo1w1DL6yd2WNTCnNTzDqkC6MBXq7axo77P16yrBuf",
       "minValueChangeForNewRound": 150
     },
     "SoLEao:sol": {
       "source": ["goprices"],
-      "tokenMint": "SoLEao8wTzSfqhuou8rcYsVoLjthVmiXuEjzdNPMnCz",
+      "priceMint": "SoLEao8wTzSfqhuou8rcYsVoLjthVmiXuEjzdNPMnCz",
       "relativeTo": "So11111111111111111111111111111111111111112",
       "minValueChangeForNewRound": 500
     },
