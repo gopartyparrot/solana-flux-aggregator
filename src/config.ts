@@ -109,7 +109,7 @@ interface SolinkLpTokenSubmitterConfig {
 export interface SolinkSubmitterConfig {
   source?: FeedSource[]
   additionalSources?: FeedSource[]
-  tokenMint?: string
+  priceMint?: string
   relativeTo?: string
   useEwma?: boolean
   inverse?: boolean

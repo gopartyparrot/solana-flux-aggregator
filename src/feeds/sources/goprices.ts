@@ -44,11 +44,11 @@ export class GOPrices extends PriceFeed {
       return
     }
 
-    if (!config.tokenMint) {
-      this.log.error('go prices config missing token mint', { pair })
+    if (!config.priceMint) {
+      this.log.error('go prices: config missing price mint', { pair })
       return
     }
-    const mint = config.tokenMint
+    const mint = config.priceMint
     const relativeTo = config.relativeTo ?? ''
     const useEwma = config.useEwma ?? false
 
