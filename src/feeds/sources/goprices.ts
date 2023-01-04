@@ -6,7 +6,7 @@ import BigNumber from 'bignumber.js'
 
 export class GOPrices extends PriceFeed {
   // go prices feed must have 6 decimals
-  public decimals = 6
+  // public decimals = 6
   public source = FeedSource.GOPRICES
   protected log = log.child({ class: this.source })
   protected baseurl = ''
@@ -75,27 +75,40 @@ export class GOPrices extends PriceFeed {
     this.log.debug('go prices fetch', { mint })
     const { data } = await axios.get(`${this.priceURL}/api/valuations/${mint}`)
 
-    let value = this.parsePrice(data.dollar)
+    let decimals = 6
+    switch (pair) {
+      case 'usdc:btc':
+        decimals = 10
+        break
+      case 'sol:usd':
+        decimals = 2
+        break
+      default: // prt:usd
+        decimals = 6
+        break
+    }
+
+    let value = this.parsePrice(data.dollar, decimals)
     if (relativeTo) {
-      value = this.parsePrice(data.relative[relativeTo])
+      value = this.parsePrice(data.relative[relativeTo], decimals)
     }
     if (useEwma) {
-      value = this.parsePrice(data.ewma)
+      value = this.parsePrice(data.ewma, decimals)
     }
 
     const price: IPrice = {
       source: this.source,
       pair,
-      decimals: this.decimals,
+      decimals,
       value,
       time: Date.now()
     }
     this.onMessage(price)
   }
 
-  parsePrice(price: number) {
+  parsePrice(price: number, decimals: number) {
     return new BigNumber(price)
-      .shiftedBy(this.decimals)
+      .shiftedBy(decimals)
       .decimalPlaces(0, BigNumber.ROUND_FLOOR)
       .toNumber()
   }
