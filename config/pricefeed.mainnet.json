@@ -5,7 +5,7 @@
     "usdc:btc": {
       "source": [ "goprices", "coinbase_inverse"],
       "priceMint": "invBTCQRACLE1111111111111111111111111111111",
-      "minValueChangeForNewRound": 400
+      "minValueChangeForNewRound": 1000
     },
     "sol:usd": {
       "source": ["goprices", "coinbase"],
